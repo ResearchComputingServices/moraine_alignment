@@ -5,3 +5,4 @@ cenv
 __pycache__
 .env
 .env.shared
+*.json
