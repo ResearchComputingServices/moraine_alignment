@@ -4,6 +4,7 @@ import time
 from config import Config
 from utils import save_to_json, load_from_json
 import os
+import logging
 
 
 
@@ -86,9 +87,10 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
         align = AlignIO.parse(alignments_file, "mauve")
         alignments = list(align)
     except Exception as e:
-        print (e)
+        logging.info (e)
         return
-
+    
+    logging.info("Filtering alignments...")
     for alignment in alignments:
 
         alignment_length = compute_alignment_length(alignment=alignment)
@@ -97,8 +99,8 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
             alignment_presence = compute_alignment_coverage(alignment=alignment, max_records=ingroup_size)
 
             if alignment_presence >= min_alignment_coverage:
-                #alignment_percentage_identity = compute_alignment_percentage_of_identity(alignment)
-                alignment_percentage_identity = 1
+                alignment_percentage_identity = compute_alignment_percentage_of_identity(alignment)
+                #alignment_percentage_identity = 1
                 
                 if alignment_percentage_identity >= min_alignment_identity:
                     id = alignment[0].id
@@ -112,9 +114,9 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
 
     #---------------------------------------------------------
     #This could be useful for a class
-    print ("Total alignments: {}".format(len(alignments)))
-    print ("Filtered Alignments: {}".format(len(filtered_alignments)))
-    print ("Percentage kept: {}".format (len(filtered_alignments)/len(alignments)*100))
+    logging.info ("Total alignments: {}".format(len(alignments)))
+    logging.info ("Filtered Alignments: {}".format(len(filtered_alignments)))
+    logging.info ("Percentage kept: {}".format (len(filtered_alignments)/len(alignments)*100))
 
     return filtered_alignments
 
@@ -134,7 +136,7 @@ def run_filter(config_args: Config):
                                             ingroup_size=config_args.ingroup_size)
     
     success = save_alignments(alignments=filtered_alignments , config_args=config_args)
-    print(success)
+    
 
     d =  load_from_json(filename = config_args.filtered_xmfa_path)
     
@@ -142,6 +144,6 @@ def run_filter(config_args: Config):
     end = time.time()
     mins = (end-start)/60
     
-    print("Runtime mins {}".format(mins))
+    logging.info("Filtering Runtime mins {}".format(mins))
 
 

@@ -3,6 +3,8 @@ from utils import get_files_in_dir_recursive, create_dir, get_today_datetime, ha
 import shutil
 import os
 import shlex, subprocess
+import logging
+import time
 
 '''File with routines that run and execute parsnp'''
 
@@ -16,11 +18,12 @@ def parsnp_wrapper(input_directory:str, reference_genome_with_path:str,  output_
         #command = "./parsnp -r " + reference_genome_with_path +  " -d " + input_directory +  " -o " + output_directory 
         #the -c forces all the genomes in the input_directory to be included in the alignment
         command = "parsnp  -p" + str(number_threads) + " -r " + reference_genome_with_path +  " -d " + input_directory +  " -o " + output_directory + " -c"
+        logging.info(command)
         args = shlex.split(command)
         #result = subprocess.run(args, capture_output=True, text=True)
         result = subprocess.call(args)
     except Exception as e:
-        print(e)
+        logging.error(e)
     
     return result
 
@@ -50,7 +53,7 @@ def verify_ingroup_folder(config_args:Config):
     #or if the ingroup size specified is less than the number of files in the ingroup directory
     if has_subfolders(config_args.ingroup_path) or (config_args.ingroup_size<len(genome_filepaths)):
 
-        print ("The ingroup location has subfolders")
+        logging.info("The ingroup location has subfolders")
         
         #Copy files into a single folder
         dir_path = config_args.data_folder
@@ -59,7 +62,7 @@ def verify_ingroup_folder(config_args:Config):
         
         if os.path.isdir(new_ingroup_path):
 
-            print ("Copying files into directory: {}".format(new_ingroup_path))
+            logging.info("Copying files into temporal directory: {}".format(new_ingroup_path))
             #Copy files to temporary directory
             count = 0
             while (count < config_args.ingroup_size):
@@ -67,8 +70,8 @@ def verify_ingroup_folder(config_args:Config):
                 try:
                     shutil.copy(file, new_ingroup_path)
                 except Exception as e:
-                    print("Error when copying files.")
-                    print(e)
+                    logging.error("Error when copying files.")
+                    logging.error(e)
                 count = count + 1
     
             #Set the ingroup location to this new folder
@@ -87,8 +90,9 @@ def verify_ingroup_folder(config_args:Config):
 '''Runs parsnp using a reference_genome (optional)'''
 '''Saves the output into a designated output folder'''
 def run_parsnp(config_args: Config, reference_genome:str=None):
-    
+
     #Loads genomes into a folder
+    logging.info("Checking ingroup folder")
     proceed = verify_ingroup_folder(config_args=config_args)
 
     if proceed:
@@ -99,8 +103,10 @@ def run_parsnp(config_args: Config, reference_genome:str=None):
     dir_name = get_today_datetime()
     xmfa_filepath = create_dir(config_args.output_parsnp_path, dir_name)
     
+    start = time.time()
     success = False
     if len(xmfa_filepath)>0:
+        logging.info ("Running parsnp")
         output = parsnp_wrapper(input_directory=config_args.ingroup_path, 
                                 reference_genome_with_path=reference_genome,  
                                 output_directory=xmfa_filepath, 
@@ -109,5 +115,13 @@ def run_parsnp(config_args: Config, reference_genome:str=None):
         if output==0 or os.path.isfile(xmfa_filelocation):
             success = True
             config_args.xmfa_file_path = xmfa_filelocation
+            logging.info("Parsnp completed succesfully")
+            logging.info("xmfa location: {}".format(config_args.xmfa_file_path))
+
+    end = time.time()
+    mins = (end-start)/60
+    
+    logging.info("Parsnp Runtime mins {}".format(mins))
+
     
     return success

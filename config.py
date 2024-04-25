@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import os
 import input_parameters as ip
@@ -76,6 +77,23 @@ class Config:
 
         print(self.minimum_alignment_length)                  
         print(self.minimum_alignment_coverage)                
-        print(self.minimum_alignment_percentage_identity) 
+        print(self.minimum_alignment_percentage_identity)
+
+    def _log(self):
+
+        info_line_1 = "Ingroup location: {} - Outgroup location: {} ".format(self.ingroup_path,self.outgroup_path)
+        info_line_2 = "Ingroup size: {} - Outgroup size: {}".format(self.ingroup_size,self.outgroup_size)
+        info_line_3 = "Alignment filtering parameters:  Min. Length: {}, Min. % Coverage {}, Min. % Identity {}".format(self.minimum_alignment_length,self.minimum_alignment_coverage,self.minimum_alignment_percentage_identity)
+        info_line_4 = "xmfa location: {} - Filtered xmfa location: {}".format(self.output_parsnp_path,self.results_path)
+
+        logging.info(info_line_1)
+        logging.info(info_line_2)
+        logging.info(info_line_3)
+        logging.info(info_line_4)
+        
+        
+        
+        
+
 
 

@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime
 from zipfile import ZipFile
@@ -12,7 +13,7 @@ def save_to_json(dictio:dict, filename:str):
             json.dump(dictio, outfile)
     except Exception as e:
         success = False
-        print(e)
+        logging.error(e)
     
     return success
 
@@ -27,7 +28,7 @@ def load_from_json(filename:str):
             dictio = json.load(openfile)
     except Exception as e:
         success = False
-        print(e)
+        logging.error(e)
     
     return success, dictio
     
@@ -41,7 +42,7 @@ def create_dir(dir_path, dir_name):
             os.mkdir(fullpath_dir)
     except Exception as e:
         fullpath_dir=''
-        print(e)
+        logging.error(e)
     
     return fullpath_dir
 
@@ -93,8 +94,8 @@ def get_files_in_dir(folder_path: str) -> list:
             if os.path.isfile(file_path):
                 file_path_list.append(file_path)
     except Exception as e:
-            print ("Directory does not exist.")
-            print (e)
+            logging.error ("Directory does not exist.")
+            logging.error(e)
             
             #logging.info ("Directory does not exist.")
             #logging.info(e)
@@ -115,8 +116,8 @@ def get_files_in_dir_recursive(folder_path: str) -> list:
                 if os.path.isdir(file_path):
                     file_path_list.extend(get_files_in_dir_recursive(file_path))
     except Exception as e:
-            print("Directory does not exist.")
-            print(e)
+            logging.error("Directory does not exist.")
+            logging.error(e)
     return file_path_list
 
 
@@ -168,12 +169,12 @@ def zip_directory(output_dir, zip_dir):
                         zip_object.write(file_path, os.path.basename(file_path))
 
         if os.path.exists(zip_filename_path):
-            print("ZIP file created")
+            logging.info("ZIP file created")
         else:
-            print("ZIP file not created")
+            logging.info("ZIP file not created")
     except Exception as e:
-        print ("An exception has occurred")
-        print(e)
+        logging.info ("An exception has occurred")
+        logging.info(e)
 
 
 '''Get files in directory visiting all subdirectories'''
@@ -192,8 +193,8 @@ def get_files_in_dir_recursive(folder_path: str) -> list:
     except Exception as e:
             #logging.info ("Directory does not exist.")
             #logging.info(e)
-            print("Directory does not exist.")
-            print(e)
+            logging.info("Directory does not exist.")
+            logging.info(e)
 
     return file_path_list
 
@@ -211,8 +212,8 @@ def has_subfolders(folder_path: str) -> bool:
     except Exception as e:
             #logging.info ("Directory does not exist.")
             #logging.info(e)
-            print("Directory does not exist.")
-            print(e)
+            logging.info("Directory does not exist.")
+            logging.info(e)
 
     return subfolders
 

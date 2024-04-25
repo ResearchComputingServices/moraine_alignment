@@ -4,24 +4,54 @@ from parsnp_alignment import run_parsnp
 from alignments_filter import run_filter
 from utils import delete_files, get_today_datetime,create_dir
 from ncbi_blast import run_blast
+import logging
+import time
 
+def config_logging(log_dir:str):
+    output_filename_prefix = "LOG"
+    log_file_name = f"{output_filename_prefix}_{time.strftime('%y_%m_%d_%H_%M')}.log"
+    log_file_name_path = os.path.join(log_dir, log_file_name)
+    logging.basicConfig(level=logging.INFO,
+                        filename=log_file_name_path, 
+                        filemode='w', 
+                        format='%(asctime)s %(levelname)s %(filename)s %(funcName)s(%(lineno)d) %(message)s')
 
-def main():
+'''This routine setup the config file based on the input parameters'''
+'''and the log file.'''
+def setup_run():
+
+    config_args = None
+
     #Load input parameters
     config_args = Config()
-    config_args._print()
-
-
+   
     #Verify output paths exit; otherwise create them.
     for path in [config_args.temp_path, config_args.output_path, config_args.output_parsnp_path]:
         os.makedirs(path, exist_ok=True)
-
 
     #Create results folder
     dir_name = get_today_datetime()
     results_path = create_dir(config_args.output_path,dir_name)
     config_args.results_path = results_path
- 
+
+    #Setup the logs
+    config_logging(log_dir=results_path)
+
+    return config_args
+
+
+def main():
+    
+    #Setup all the running parameters
+    config_args = setup_run()
+
+    if config_args==None:
+        return
+
+    #Log input parameters and config
+    config_args._log()
+
+
 
     #Run parsnp 
     success = True
@@ -31,13 +61,23 @@ def main():
     
     #If success, filter alignments
     if success:
-        run_filter(config_args=config_args)
+         run_filter(config_args=config_args)
 
 
-    #Delete at some point the temp directory where the ingroup was copied (if one was created)
+    # #Delete at some point the temp directory where the ingroup was copied (if one was created)
     if config_args.copied_ingroup_folder:
-        delete_files(config_args.ingroup_folder)
+         delete_files(config_args.ingroup_path)
+         os.rmdir(config_args.ingroup_path)
+
+
+
 
 if __name__ == '__main__':
-    #main()
-    run_blast()    
+    start = time.time()
+    main()
+    end = time.time()
+    mins = (end-start)/60
+    
+    logging.info("Total Runtime mins {}".format(mins))
+
+    #run_blast()    
