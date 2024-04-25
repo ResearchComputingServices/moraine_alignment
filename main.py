@@ -3,6 +3,7 @@ from config import Config
 from parsnp_alignment import run_parsnp
 from alignments_filter import run_filter
 from utils import delete_files, get_today_datetime,create_dir
+from ncbi_blast import run_blast
 
 
 def main():
@@ -38,5 +39,5 @@ def main():
         delete_files(config_args.ingroup_folder)
 
 if __name__ == '__main__':
-    main()
-
+    #main()
+    run_blast()    
