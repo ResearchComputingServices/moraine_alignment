@@ -135,7 +135,8 @@ def run_filter(config_args: Config):
                                             min_alignment_identity =  config_args.minimum_alignment_percentage_identity,
                                             ingroup_size=config_args.ingroup_size)
     
-    success = save_alignments(alignments=filtered_alignments , config_args=config_args)
+    success = save_alignments(alignments=filtered_alignments, config_args=config_args)
+    print_stats(filtered_alignments=filtered_alignments, config=config_args)
     
 
     d =  load_from_json(filename = config_args.filtered_xmfa_path)
@@ -145,5 +146,22 @@ def run_filter(config_args: Config):
     mins = (end-start)/60
     
     logging.info("Filtering Runtime mins {}".format(mins))
+
+
+#----------------------------------------
+def print_stats(filtered_alignments:dict, config):
+    
+    max = 0
+    file = open(config.results_path+'/lenghts.txt','w+') 
+    for alignment in filtered_alignments.items():
+        for sequence in alignment[1]["sequences"]:
+            if len(sequence)>max:
+                max = len(sequence)
+        file.write(str(max))
+        file.write('\n')
+        max = 0
+    file.close()
+
+
 
 

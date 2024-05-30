@@ -15,6 +15,8 @@ def config_logging(log_dir:str):
                         filename=log_file_name_path, 
                         filemode='w', 
                         format='%(asctime)s %(levelname)s %(filename)s %(funcName)s(%(lineno)d) %(message)s')
+    logging.info("Logs have been setup!")
+
 
 '''This routine setup the config file based on the input parameters'''
 '''and the log file.'''
@@ -68,7 +70,7 @@ def main():
     if config_args.copied_ingroup_folder:
          delete_files(config_args.ingroup_path)
          os.rmdir(config_args.ingroup_path)
-
+ 
 
 
 

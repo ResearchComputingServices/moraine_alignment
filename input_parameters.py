@@ -1,12 +1,12 @@
 DATA_FOLDER = "/data"
 MULTIFASTA_FOLDER = "Multifasta/"
 TEMP_FOLDER = "Temp/"
-INGROUP_FOLDER = "Ingroup_Echoli_10"
+INGROUP_FOLDER = "Ingroup_Echoli_1000"
 OUTGROUP_FOLDER = "Outgroup_Wong/"
 OUTPUT_FOLDER = "Output/"
 OUTPUT_PARSNP_FOLDER = "Output_parsnp/"
 
-INGROUP_SIZE = 4
+INGROUP_SIZE = 500
 OUTGROUP_SIZE = 4
 
 #Filtering parameters for the parsnp alignment
