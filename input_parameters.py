@@ -1,5 +1,6 @@
 DATA_FOLDER = "/data"
 MULTIFASTA_FOLDER = "Multifasta/"
+IN_PROCESS_FOLDER = "in_process"
 TEMP_FOLDER = "Temp/"
 INGROUP_FOLDER = "Ingroup_Echoli_1000"
 OUTGROUP_FOLDER = "Outgroup_Wong/"
@@ -17,3 +18,12 @@ MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 0.99
 
 #Add the location of the parsnp file to avoid re-run parsnp
 PARSNP_XMFA_FILE_LOCATION = ""
+FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/filtered_test/filtered_parsnp.json"
+
+
+#Maximum sequence length for a sequence alignment to be blast
+SEQUENCE_LENGTH = 150
+SHIFT = 100
+
+#Format
+FORMAT = "fasta"

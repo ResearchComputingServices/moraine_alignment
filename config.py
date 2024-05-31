@@ -18,7 +18,8 @@ class Config:
         self.ingroup_size = ip.INGROUP_SIZE
         self.outgroup_size = ip.OUTGROUP_SIZE
 
-        self.multifasta_path = os.path.join(self.data_folder,self.multifasta_folder)   
+        self.multifasta_path = os.path.join(self.data_folder,self.multifasta_folder)
+        self.in_process_path = os.path.join(self.multifasta_path,ip.IN_PROCESS_FOLDER)
         self.ingroup_path = os.path.join(self.data_folder,self.ingroup_folder)
         self.outgroup_path = os.path.join(self.data_folder,self.outgroup_folder)
 
@@ -34,11 +35,16 @@ class Config:
         self.minimum_alignment_coverage = ip.MINIMUM_ALIGNMENT_COVERAGE                
         self.minimum_alignment_percentage_identity = ip.MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY    
 
+        self.format = ip.FORMAT
+        self.sequence_length = ip.SEQUENCE_LENGTH
+        self.shift  = ip.SHIFT
+
 
         #Other variables
         self.xmfa_file_path=""
         self.xmfa_file_name = "parsnp.xmfa"
         self.copied_ingroup_folder = False
+        self.copied_outgroup_folder = False
         self.filtered_xmfa_name = "filtered_parsnp.json"
         self.filtered_xmfa_path=""
         self.results_path = ""
@@ -46,10 +52,15 @@ class Config:
         if ip.PARSNP_XMFA_FILE_LOCATION!="" and os.path.isfile(ip.PARSNP_XMFA_FILE_LOCATION):
             self.xmfa_file_path = ip.PARSNP_XMFA_FILE_LOCATION
 
+        if ip.FILTERED_XMFA_FILE_LOCATION!="" and os.path.isfile(ip.FILTERED_XMFA_FILE_LOCATION):
+            self.filtered_xmfa_path = ip.FILTERED_XMFA_FILE_LOCATION
+ 
         if os.cpu_count()>1:
            self.parsnp_number_threads = 8 
         else:
            self.parsnp_number_threads = 1 
+        
+        self.processors_number = os.cpu_count()
 
         
     def _print(self):

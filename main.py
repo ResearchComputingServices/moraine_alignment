@@ -6,6 +6,7 @@ from utils import delete_files, get_today_datetime,create_dir
 from ncbi_blast import run_blast
 import logging
 import time
+import pathogens
 
 def config_logging(log_dir:str):
     output_filename_prefix = "LOG"
@@ -52,18 +53,17 @@ def main():
 
     #Log input parameters and config
     config_args._log()
-
-
-
+    pathogens.pathogens_testing(config_args=config_args)
+    
     #Run parsnp 
-    success = True
-    if config_args.xmfa_file_path=="":
-        success = run_parsnp(config_args=config_args, reference_genome=None)
+    # success = True
+    # if config_args.xmfa_file_path=="":
+    #     success = run_parsnp(config_args=config_args, reference_genome=None)
         
     
     #If success, filter alignments
-    if success:
-         run_filter(config_args=config_args)
+    # if success:
+    #      run_filter(config_args=config_args)
 
 
     # #Delete at some point the temp directory where the ingroup was copied (if one was created)
@@ -71,7 +71,9 @@ def main():
          delete_files(config_args.ingroup_path)
          os.rmdir(config_args.ingroup_path)
  
-
+    if config_args.copied_outgroup_folder:
+        delete_files(config_args.outgroup_path)
+        os.rmdir(config_args.outgroup_path)
 
 
 if __name__ == '__main__':
