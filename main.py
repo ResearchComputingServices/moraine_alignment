@@ -7,6 +7,7 @@ from ncbi_blast import run_blast
 import logging
 import time
 import pathogens
+from report import create_general_report
 
 def config_logging(log_dir:str):
     output_filename_prefix = "LOG"
@@ -53,18 +54,20 @@ def main():
 
     #Log input parameters and config
     config_args._log()
-    pathogens.pathogens_testing(config_args=config_args)
     
     #Run parsnp 
-    # success = True
-    # if config_args.xmfa_file_path=="":
-    #     success = run_parsnp(config_args=config_args, reference_genome=None)
+    success = True
+    if config_args.xmfa_file_path=="" and config_args.filtered_xmfa_path=="":
+        success = run_parsnp(config_args=config_args, reference_genome=None)
         
     
     #If success, filter alignments
-    # if success:
-    #      run_filter(config_args=config_args)
+    if success and config_args.filtered_xmfa_path=="":
+         run_filter(config_args=config_args)
 
+    if success:
+        alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
+        create_general_report(config_args=config_args, pathogen_candidates=alignment_genomes, mins=0)
 
     # #Delete at some point the temp directory where the ingroup was copied (if one was created)
     if config_args.copied_ingroup_folder:
@@ -74,6 +77,8 @@ def main():
     if config_args.copied_outgroup_folder:
         delete_files(config_args.outgroup_path)
         os.rmdir(config_args.outgroup_path)
+    
+    
 
 
 if __name__ == '__main__':
@@ -82,6 +87,6 @@ if __name__ == '__main__':
     end = time.time()
     mins = (end-start)/60
     
-    logging.info("Total Runtime mins {}".format(mins))
+    logging.info("\n\n Total Runtime mins {}".format(mins))
 
     #run_blast()    

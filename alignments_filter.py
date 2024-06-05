@@ -90,9 +90,10 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
         logging.info (e)
         return
     
-    logging.info("Filtering alignments...")
-    for alignment in alignments:
+    count = 1
 
+    for alignment in alignments:
+        logging.info("Filtering cluster {} of {}".format(count,len(alignments)))
         alignment_length = compute_alignment_length(alignment=alignment)
         
         if alignment_length >= min_alignment_length:
@@ -108,9 +109,13 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
                     alignment_number = alignment_id[7:len(alignment_id)]
                     d = {}
                     d["id"] = id
+                    d["Name"] = alignment[0].name
+                    d["Strand"] = alignment[0].annotations['strand']
                     d["sequences"]= get_alignment_sequences(alignment=alignment, percentage_identity=alignment_percentage_identity)
                     
                     filtered_alignments[alignment_number] = d
+    
+        count = count + 1
 
     #---------------------------------------------------------
     #This could be useful for a class
@@ -146,6 +151,7 @@ def run_filter(config_args: Config):
     mins = (end-start)/60
     
     logging.info("Filtering Runtime mins {}".format(mins))
+    return success
 
 
 #----------------------------------------

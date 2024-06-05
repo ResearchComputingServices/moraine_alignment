@@ -62,7 +62,10 @@ class Config:
         
         self.processors_number = os.cpu_count()
 
-        
+        self.e_cutoff_outgroup = ip.E_CUTOFF_OUTGROUP
+        self.perc_identity_outgroup = ip.PERC_IDENTITY_OUTGROUP
+        self.max_hsps = 1
+
     def _print(self):
         print(self.data_folder)
         print(self.multifasta_folder)
