@@ -47,6 +47,8 @@ def setup_run():
 
 def main():
     
+    start = time.time()
+
     #Setup all the running parameters
     config_args = setup_run()
 
@@ -69,7 +71,9 @@ def main():
     if success:
         alignment_genomes = pathogens.get_pathogens_from_alignments__parallel(config_args=config_args)
         #alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
-        create_general_report(config_args=config_args, pathogen_candidates=alignment_genomes, mins=0)
+        end = time.time()
+        mins = (end-start)/60
+        create_general_report(config_args=config_args, pathogen_candidates=alignment_genomes, mins=mins)
 
     # #Delete at some point the temp directory where the ingroup was copied (if one was created)
     if config_args.copied_ingroup_folder:
@@ -84,14 +88,13 @@ def main():
     delete_files(config_args.multifasta_path)
     delete_files(config_args.in_process_path)
     
-
-
-if __name__ == '__main__':
-    start = time.time()
-    main()
     end = time.time()
     mins = (end-start)/60
     
     logging.info("\n\n Total Runtime mins {}".format(mins))
 
+
+if __name__ == '__main__':
+    main()
+   
     #run_blast()    
