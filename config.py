@@ -38,6 +38,7 @@ class Config:
         self.format = ip.FORMAT
         self.sequence_length = ip.SEQUENCE_LENGTH
         self.shift  = ip.SHIFT
+        self.outgroup_filter_percentage = ip.OUTGROUP_FILTER_PERCENTAGE
 
 
         #Other variables
@@ -46,6 +47,7 @@ class Config:
         self.copied_ingroup_folder = False
         self.copied_outgroup_folder = False
         self.filtered_xmfa_name = "filtered_parsnp.json"
+        self.reduced_filtered_xmfa_name = "reduced_filtered_parsnp.json"
         self.filtered_xmfa_path=""
         self.results_path = ""
 

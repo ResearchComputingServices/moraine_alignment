@@ -8,7 +8,8 @@ import logging
 import time
 import pathogens
 from report import create_general_report
-
+from pathogens import get_pathogens_from_alignments__parallel
+    
 def config_logging(log_dir:str):
     output_filename_prefix = "LOG"
     log_file_name = f"{output_filename_prefix}_{time.strftime('%y_%m_%d_%H_%M')}.log"
@@ -63,10 +64,11 @@ def main():
     
     #If success, filter alignments
     if success and config_args.filtered_xmfa_path=="":
-         run_filter(config_args=config_args)
+         success = run_filter(config_args=config_args)
 
     if success:
-        alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
+        alignment_genomes = pathogens.get_pathogens_from_alignments__parallel(config_args=config_args)
+        #alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
         create_general_report(config_args=config_args, pathogen_candidates=alignment_genomes, mins=0)
 
     # #Delete at some point the temp directory where the ingroup was copied (if one was created)
@@ -77,7 +79,10 @@ def main():
     if config_args.copied_outgroup_folder:
         delete_files(config_args.outgroup_path)
         os.rmdir(config_args.outgroup_path)
-    
+
+    logging.info("Deleting temporal files -------------------------------------\n")
+    delete_files(config_args.multifasta_path)
+    delete_files(config_args.in_process_path)
     
 
 

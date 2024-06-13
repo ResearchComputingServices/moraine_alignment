@@ -322,6 +322,148 @@ def blast_subsequences_against_genomes(genomes_query: List[Genome],
 
 
 
+#Parallelization by outgroup
+#Each processor will blast the subsequences of an alignment to the outgroup' sequence
+#---------------------------------------------------------------------------------------------------------------------------------------------
+def blast_multifasta_files_vs_subject(subject_info:dict, query_fasta_paths:List[str], config_args):
+    
+    subject_fasta = subject_info["subject_fasta"]
+    subject_genome_sequence = ""
+    subject_genome_id = subject_info["subject_genome_id"]
+
+    query_blast_results = []
+    #print(subject_info)
+    for fp in query_fasta_paths: 
+        blast_result = ncbi_blast_multifasta(query_file=fp, subject_file=subject_fasta, subject_sequence=subject_genome_sequence, subject_id=subject_genome_id, 
+                                            e_cutoff=config_args.e_cutoff_outgroup, identity_perc_cutoff=config_args.perc_identity_outgroup, 
+                                            max_hsps=config_args.max_hsps)
+        query_blast_results.append(blast_result)
+    
+    
+    return query_blast_results
+        
+
+#---------------------------------------------------------------------------------------------------------------------------------------------          
+def blast_query_subsequences_vs_outgroup(config_args:Config, query_fasta_paths:List[str], genomes_subject:dict, subject_sequence_fasta_paths: List[str]):
+    
+    executor = concurrent.futures.ProcessPoolExecutor(max_workers=config_args.processors_number)
+
+    
+    processors_results = [] 
+    processor_index=0
+    subject_index = 0
+    processors_tasks = []
+    total_subjects = len(genomes_subject)
+    calls = 1
+
+
+    #This is just for TESTING that we are doing all the outgroups
+    #------------------------------------------------------------
+    #all_outgroup_ids = []
+    #for subject_genome_id in genomes_subject:
+    #    all_outgroup_ids.append(subject_genome_id)
+    #------------------------------------------------------------
+    
+    for subject_genome_id, subject_genome in genomes_subject.items():
+        if processor_index<config_args.processors_number and subject_index<total_subjects:
+           
+            subject_fasta = subject_sequence_fasta_paths[subject_genome_id]
+            subject_info ={}
+            subject_info["subject_genome_id"] = subject_genome_id
+            subject_info["subject_fasta"] = subject_fasta
+            processors_tasks.append(subject_info)
+            processor_index = processor_index + 1
+            subject_index = subject_index + 1
+
+            #For testing --------------------------------------------------
+            #if subject_genome_id in all_outgroup_ids:
+            #    all_outgroup_ids.remove(subject_genome_id)
+            #else:
+            #    logging.ERROR("We are looking for an unexistent id. ")
+
+            #--------------------------------------------------------------
+
+            if processor_index>=config_args.processors_number or subject_index>=total_subjects:
+                #processors_results = blast_multifasta_files_vs_subject(subject_info=subject_info, query_fasta_paths=query_fasta_paths, config_args=config_args)
+    
+                logging.info("Call {}".format(calls))
+                future_results = [executor.submit(blast_multifasta_files_vs_subject, subject_info, query_fasta_paths, config_args) for subject_info in processors_tasks]   
+              
+                for finished in concurrent.futures.as_completed(future_results, timeout=600):
+                    try:
+                        processors_results.append(finished.result())
+                        #logging.info(finished.result())
+                    except concurrent.futures._base.TimeoutError:
+                        logging.error("Process took to long to complete")
+                        #print("Process took to long to compete")
+                    except Exception as exc:
+                        logging.error("Exception occurred")
+                        logging.error(exc)
+                        #print ("Exception occurred: ")
+                        #print (exc)
+                
+                processors_tasks = []
+                processor_index=0
+                calls = calls + 1
+    
+    #For testing --------------------------------------------------
+    #if len(all_outgroup_ids)==0:
+    #    logging.INFO("Test passed. We run all the outgroup")
+    #else:
+    #    logging.ERROR("We are missing to run some outgroup")
+    #--------------------------------------------------------------
+
+                
+    return processors_results
+    
+
+    #Map all results back to the classes
+
+
+
+'''Blast the set of subsequences of a genome against a genome sequence'''
+'''Parallelized by Outgroup'''
+def blast_subsequences_against_genomes__parallel(genomes_query: List[Genome], 
+                                       genomes_subject: List[Genome], 
+                                       query_subseq_fasta_paths: List[str], 
+                                       subject_sequence_fasta_paths: List[str],          
+                                       config_args: Config = None):
+    start = time.time()
+    
+    logging.info("Blast {} multifasta files vs {} outgroups \n".format(len(query_subseq_fasta_paths),len(subject_sequence_fasta_paths)))
+    for query_index  in range(0,len(genomes_query)):
+        
+        #print ("Genome {}".format(query_index))
+        query_genome_id = genomes_query[query_index].id
+        query_genome_description = genomes_query[query_index].description
+        
+        #Get the file with the subsequences filepaths corresponding to blast
+        if query_genome_id not in query_subseq_fasta_paths:
+            continue
+        
+        query_fasta_paths = query_subseq_fasta_paths[query_genome_id]
+        blast_results = blast_query_subsequences_vs_outgroup(config_args=config_args, query_fasta_paths=query_fasta_paths, genomes_subject=genomes_subject, subject_sequence_fasta_paths=subject_sequence_fasta_paths)
+    
+        
+        for blast_result_list in blast_results:
+            for blast_result in blast_result_list:
+                map_blast_results_to_genome(genome=genomes_query[query_index], blast_results=blast_result)
+            #save_blast_result(blast_results=blast_results)
+                      
+    #logging.info("total json files: {}.".format(total_json_files))            
+    end = time.time()
+    mins = (end-start)/60
+    
+    logging.info("Blast mins {}".format(mins))
+
+
+
+
+
+
+
+
+
 
 
 
