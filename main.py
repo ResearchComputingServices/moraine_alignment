@@ -8,7 +8,6 @@ import logging
 import time
 import pathogens
 from report import create_general_report
-from pathogens import get_pathogens_from_alignments__parallel
     
 def config_logging(log_dir:str):
     output_filename_prefix = "LOG"
@@ -49,8 +48,10 @@ def main():
     
     start = time.time()
 
+
     #Setup all the running parameters
     config_args = setup_run()
+    config_args.stats.start_time = start
 
     if config_args==None:
         return
@@ -68,11 +69,14 @@ def main():
     if success and config_args.filtered_xmfa_path=="":
          success = run_filter(config_args=config_args)
 
+    
     if success:
         alignment_genomes = pathogens.get_pathogens_from_alignments__parallel(config_args=config_args)
         #alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
         end = time.time()
         mins = (end-start)/60
+        config_args.stats.end_time =end
+        config_args.stats.total_runtime = mins
         create_general_report(config_args=config_args, pathogen_candidates=alignment_genomes, mins=mins)
 
     # #Delete at some point the temp directory where the ingroup was copied (if one was created)

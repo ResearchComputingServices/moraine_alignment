@@ -5,6 +5,7 @@ import os
 import shlex, subprocess
 import logging
 import time
+from stats import Stats
 
 '''File with routines that run and execute parsnp'''
 
@@ -91,6 +92,7 @@ def verify_ingroup_folder(config_args:Config):
 '''Saves the output into a designated output folder'''
 def run_parsnp(config_args: Config, reference_genome:str=None):
 
+    start = time.time()
     #Loads genomes into a folder
     logging.info("Checking ingroup folder")
     proceed = verify_ingroup_folder(config_args=config_args)
@@ -103,7 +105,6 @@ def run_parsnp(config_args: Config, reference_genome:str=None):
     dir_name = get_today_datetime()
     xmfa_filepath = create_dir(config_args.output_parsnp_path, dir_name)
     
-    start = time.time()
     success = False
     if len(xmfa_filepath)>0:
         logging.info ("Running parsnp")
@@ -120,6 +121,7 @@ def run_parsnp(config_args: Config, reference_genome:str=None):
 
     end = time.time()
     mins = (end-start)/60
+    config_args.stats.parsnp_runtime = mins
     
     logging.info("Parsnp Runtime mins {}".format(mins))
 

@@ -204,7 +204,7 @@ def fill_dict(sequence_file: str, sequence_header:str, sequence_length:str):
     return d          
 
 #------------------------------------------------------------------------------------------------------------------------
-def load_file(filename: str):
+def parse_metadata_xmfa(filename: str):
     
     sequence_info = {}
  
@@ -263,43 +263,60 @@ def load_file(filename: str):
 '''Filters all alignments on a xmfa file based on three parameters: elenght, coverage, and identity'''
 '''Returns the filtered alignments as a dictionary'''
 '''Saves the alignments as a json file into a location'''
-def filter_alignments(alignments_file: str, min_alignment_length: int, min_alignment_coverage: int, min_alignment_identity: float, ingroup_size:int):
+def filter_alignments(alignments_file: str, min_alignment_length: int, min_alignment_coverage: int, min_alignment_identity: float, ingroup_size:int, config_args:Config):
 
     filtered_alignments = {}
     
+    #Parse the alignments file (xmfa) returned by parsnp to 
+    #obtain alignments 
     try:
         align = AlignIO.parse(alignments_file, "mauve")
         alignments = list(align)
+        config_args.stats.alignments_found_by_parsnp = len(alignments)
     except Exception as e:
         logging.info (e)
         return
     
+    #Parse the alignments file (xmfa) returned by parsnp to
+    #obtain metadata (number of genomes, filename, strand, etc)
     try:
-        alignment_info = load_file(alignments_file)
+        alignment_info = parse_metadata_xmfa(alignments_file)
     except Exception as e:
         logging.info (e)
     
     
     
     count = 1
+    alignments_kept_by_length = 0
+    alignments_kept_by_coverage = 0
+    alignments_kept_by_identity = 0
+    
 
+    alignments_discarded_by_length = 0
+    alignments_discarded_by_coverage = 0
+    alignments_discarded_by_identity = 0
+    
     #logging.info("Filtering using pairwise \n")
 
     for alignment in alignments:
-        #logging.info("Filtering cluster {} of {}".format(count,len(alignments)))
+        logging.info("Filtering cluster {} of {}".format(count,len(alignments)))
         alignment_length = compute_alignment_length(alignment=alignment)
         
         if alignment_length >= min_alignment_length:
+            alignments_kept_by_length = alignments_kept_by_length + 1
+
             alignment_presence = compute_alignment_coverage(alignment=alignment, max_records=ingroup_size)
 
             if alignment_presence >= min_alignment_coverage:
+                alignments_kept_by_coverage = alignments_kept_by_coverage + 1
+                
                 alignment_percentage_identity = compute_alignment_percentage_of_identity(alignment)
-
                 #alignment_percentage_identity = compute_average_alignment_percentage_of_identity(alignment=alignment)
-
                 #alignment_percentage_identity = 1
                 
                 if alignment_percentage_identity >= min_alignment_identity:
+                    alignments_kept_by_identity = alignments_kept_by_identity + 1
+
                     id = alignment[0].id
                     alignment_id = id.split()[0]
                     alignment_number = alignment_id[7:len(alignment_id)]
@@ -323,6 +340,14 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
                         
                         
                     filtered_alignments[alignment_number] = d
+            
+                else:
+                    alignments_discarded_by_identity = alignments_discarded_by_identity + 1
+       
+            else:
+                alignments_discarded_by_coverage = alignments_discarded_by_coverage + 1
+        else:
+            alignments_discarded_by_length = alignments_discarded_by_length + 1
     
         count = count + 1
 
@@ -331,6 +356,13 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
     logging.info ("Total alignments: {}".format(len(alignments)))
     logging.info ("Filtered Alignments: {}".format(len(filtered_alignments)))
     logging.info ("Percentage kept: {}".format (len(filtered_alignments)/len(alignments)*100))
+    logging.info("Discarded by identity {}".format(alignments_discarded_by_identity))
+
+
+    total_alignments = len(alignments)
+    config_args.stats.set_alignments_discarded_by_length(count=alignments_discarded_by_length)
+    config_args.stats.set_alignments_discarded_by_coverage(count=alignments_discarded_by_coverage)
+    config_args.stats.set_alignments_discared_by_percentage_of_identity(count=alignments_discarded_by_identity)
 
     return filtered_alignments
 
@@ -347,21 +379,29 @@ def run_filter(config_args: Config):
                                             min_alignment_length = config_args.minimum_alignment_length, 
                                             min_alignment_coverage = config_args.minimum_alignment_coverage,
                                             min_alignment_identity =  config_args.minimum_alignment_percentage_identity,
-                                            ingroup_size=config_args.ingroup_size)
+                                            ingroup_size=config_args.ingroup_size,
+                                            config_args=config_args)
     
     success = save_alignments(alignments=filtered_alignments, config_args=config_args, alignment_filename = config_args.filtered_xmfa_name)
-    print_stats(filtered_alignments=filtered_alignments, config=config_args)
+    #print_stats(filtered_alignments=filtered_alignments, config=config_args)
     
 
     #d =  load_from_json(filename = config_args.filtered_xmfa_path)
 
     filtered_alignments_reduced = reduce_sequences_in_alignments(alignments=filtered_alignments)
+    
+    alignments_discared_by_slash = len(filtered_alignments) - len(filtered_alignments_reduced)
+    config_args.stats.set_alignments_discarded_by_slash(count=alignments_discared_by_slash)
+    config_args.stats.compute_total_alignnments_kept()
+
     success = save_alignments(alignments=filtered_alignments_reduced, config_args=config_args, alignment_filename = config_args.reduced_filtered_xmfa_name)
     
     end = time.time()
     mins = (end-start)/60
     
     logging.info("Filtering Runtime mins {}".format(mins))
+    config_args.stats.filtering_runtime = mins
+
     return success
 
 

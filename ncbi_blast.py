@@ -15,6 +15,7 @@ from Bio.Blast import NCBIXML
 import io
 
 
+
 '''Calls ncbi_blast using biopython wrapper'''
 def ncbi_blast_bio(
     query_file:str,
@@ -354,7 +355,7 @@ def blast_query_subsequences_vs_outgroup(config_args:Config, query_fasta_paths:L
     subject_index = 0
     processors_tasks = []
     total_subjects = len(genomes_subject)
-    calls = 1
+    #calls = 1
 
 
     #This is just for TESTING that we are doing all the outgroups
@@ -379,14 +380,14 @@ def blast_query_subsequences_vs_outgroup(config_args:Config, query_fasta_paths:L
             #if subject_genome_id in all_outgroup_ids:
             #    all_outgroup_ids.remove(subject_genome_id)
             #else:
-            #    logging.ERROR("We are looking for an unexistent id. ")
+            #    logging.error("We are looking for an unexistent id. ")
 
             #--------------------------------------------------------------
 
             if processor_index>=config_args.processors_number or subject_index>=total_subjects:
                 #processors_results = blast_multifasta_files_vs_subject(subject_info=subject_info, query_fasta_paths=query_fasta_paths, config_args=config_args)
     
-                logging.info("Call {}".format(calls))
+                #logging.info("Call {}".format(calls))
                 future_results = [executor.submit(blast_multifasta_files_vs_subject, subject_info, query_fasta_paths, config_args) for subject_info in processors_tasks]   
               
                 for finished in concurrent.futures.as_completed(future_results, timeout=600):
@@ -404,13 +405,13 @@ def blast_query_subsequences_vs_outgroup(config_args:Config, query_fasta_paths:L
                 
                 processors_tasks = []
                 processor_index=0
-                calls = calls + 1
+                #calls = calls + 1
     
     #For testing --------------------------------------------------
     #if len(all_outgroup_ids)==0:
-    #    logging.INFO("Test passed. We run all the outgroup")
+    #    logging.info("Test passed. We run all the outgroup")
     #else:
-    #    logging.ERROR("We are missing to run some outgroup")
+    #    logging.error("We are missing to run some outgroup")
     #--------------------------------------------------------------
 
                 
@@ -453,6 +454,7 @@ def blast_subsequences_against_genomes__parallel(genomes_query: List[Genome],
     #logging.info("total json files: {}.".format(total_json_files))            
     end = time.time()
     mins = (end-start)/60
+    config_args.stats.blast_runtime = config_args.stats.blast_runtime + mins
     
     logging.info("Blast mins {}".format(mins))
 

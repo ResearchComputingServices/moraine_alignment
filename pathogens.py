@@ -452,8 +452,8 @@ def get_pathogens_from_alignments__parallel(config_args:Config):
 
     #Read outgroup files and create a genome object
     logging.info("Reding Outgroup ------------------------------------------------ \n")
-    outgroup_genomes = read_genomes(config_args=config_args, type="Outgroup")
-    #outgroup_genomes = read_genomes_duplicate(config_args=config_args, larger_size=500, type="Outgroup")
+    #outgroup_genomes = read_genomes(config_args=config_args, type="Outgroup")
+    outgroup_genomes = read_genomes_duplicate(config_args=config_args, larger_size=100, type="Outgroup")
 
 
     if len(outgroup_genomes)==0:
@@ -471,20 +471,28 @@ def get_pathogens_from_alignments__parallel(config_args:Config):
 
     count = 1
     alignment_genomes = {}
+    total_subsequences_from_alignments = 0
+    
     #There exists a filtered alignment file
     if config_args.filtered_xmfa_path!="":
         success, filtered_alignments =  load_from_json(filename = config_args.filtered_xmfa_path)
         
+        #The pipeline didn't run the filtering part
+        if config_args.stats.total_alignments_kept==0:
+            config_args.stats.total_alignments_kept = len(filtered_alignments)
+            
         if success:
-            for alignment in filtered_alignments.items():
+            for filtered_alignment in filtered_alignments.items():
                 logging.info("\n")
                 logging.info("Procesing genome {} of {} --------------------------------".format(count, len(filtered_alignments)))
                 #Get all the subsequences if the alignmnent sequence is larger than a threshold
-                alignment, subsequence_files = get_alignment_subsequences(config_args=config_args, alignment=alignment[1])
+                alignment_object, subsequence_files = get_alignment_subsequences(config_args=config_args, alignment=filtered_alignment[1])
+                total_subsequences_from_alignments = total_subsequences_from_alignments + alignment_object.original_subsequences_count
                 
                 #Blast the alignment subsequences (or sequence) against the outgroup
                 if len(subsequence_files)>0:
-                    blast_subsequences_against_genomes__parallel(genomes_query=[alignment], genomes_subject=outgroup_genomes, query_subseq_fasta_paths=subsequence_files,
+                    #logging.info("{} multifasta files to blast against {} outgroup".format(len(subsequence_files),len(outgroup_genomes)))
+                    blast_subsequences_against_genomes__parallel(genomes_query=[alignment_object], genomes_subject=outgroup_genomes, query_subseq_fasta_paths=subsequence_files,
                                                    subject_sequence_fasta_paths=outgroup_sequence_files,config_args=config_args)
                     
 
@@ -492,12 +500,13 @@ def get_pathogens_from_alignments__parallel(config_args:Config):
                 #filter_subsequences_with_maximum_hits(genomes=[alignment_genome], outgroup_size=len(outgroup_genomes), max_percentage_genomes=config_args.outgroup_filter_percentage)
                 #Replace for file saving to avoid memory explosion again.
                 
-                alignment_genomes[alignment.id]=alignment
+                alignment_genomes[alignment_object.id]=alignment_object
                 count = count + 1    
 
                 if count==3:
                     break
     
+    config_args.stats.total_subsequences_from_alignments = total_subsequences_from_alignments
     return alignment_genomes
 
 
