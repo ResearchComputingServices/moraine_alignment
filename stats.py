@@ -4,14 +4,12 @@ class Stats:
         self.alignments_discarded_by_length = 0
         self.alignments_discarded_by_coverage = 0 
         self.alignments_discared_by_percentage_of_identity = 0
-        self.alignments_discarded_by_slash = 0
         self.total_alignments_kept = 0
         self.total_alignments_taken = 0
 
         self.percentage_discarded_by_length = 0
         self.percentage_discarded_by_coverage = 0 
         self.percentage_discared_by_percentage_of_identity = 0
-        self.percentage_discarded_by_slash = 0
         self.percentage_alignment_kept = 0
         self.percentage_alignment_taken = 0
         
@@ -51,14 +49,8 @@ class Stats:
             self.percentage_discared_by_percentage_of_identity = self.alignments_discared_by_percentage_of_identity / self.alignments_found_by_parsnp
         
 
-    def set_alignments_discarded_by_slash(self, count):
-        self.alignments_discarded_by_slash = count
-        if self.alignments_found_by_parsnp>0:
-            self.percentage_discarded_by_slash = self.alignments_discarded_by_slash / self.alignments_found_by_parsnp
-    
-
     def compute_total_alignnments_kept(self):
-        self.total_alignments_taken = self.alignments_discarded_by_length+self.alignments_discarded_by_coverage+self.alignments_discared_by_percentage_of_identity+self.alignments_discarded_by_slash
+        self.total_alignments_taken = self.alignments_discarded_by_length+self.alignments_discarded_by_coverage+self.alignments_discared_by_percentage_of_identity
         self.total_alignments_kept = self.alignments_found_by_parsnp - self.total_alignments_taken
         if self.alignments_found_by_parsnp>0:
             self.percentage_alignment_taken = self.total_alignments_taken / self.alignments_found_by_parsnp

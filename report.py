@@ -90,9 +90,6 @@ def stats_page(config_args:Config):
     header_dict["Alignments Discarded by Coverage: "] = config_args.stats.alignments_discarded_by_coverage
     header_dict["Percentage Alignments Discarded by Coverage: "] = str(round(config_args.stats.percentage_discarded_by_coverage*100))+"%"
     
-    header_dict["Alignments Discarded by '-': "] = config_args.stats.alignments_discarded_by_slash 
-    header_dict["Percentage Alignments Discarded by '-': "] = str(round(config_args.stats.percentage_discarded_by_slash*100))+"%"
-    
     header_dict["Alignments Discarded by Percentage of Identity: "] = config_args.stats.alignments_discared_by_percentage_of_identity
     header_dict["Percentage Alignments Discarded by Percentage of Identity: "] = str(round(config_args.stats.percentage_discared_by_percentage_of_identity*100))+"%"
 

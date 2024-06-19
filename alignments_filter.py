@@ -20,6 +20,11 @@ def reduce_sequences_in_alignments(alignments:dict):
                 new_sequences.append(seq)
                 break
         
+        if len(new_sequences)==0:
+            seq = sequences[0]
+            new_seq = seq.replace("-","")
+            new_sequences.append(new_seq)
+        
         if len(new_sequences)!=0:
             d={}
             d["id"] = alignment["id"]
@@ -30,9 +35,7 @@ def reduce_sequences_in_alignments(alignments:dict):
             d["genome_header"] = alignment.get("genome_header","")
             d["sequences"]= new_sequences
             alignments_with_one_sequence[number] = d
-        #else:
-        #    print("all alignments have '-' on it")
-
+       
     return alignments_with_one_sequence    
                   
 
@@ -296,7 +299,7 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
     alignments_discarded_by_coverage = 0
     alignments_discarded_by_identity = 0
     
-    #logging.info("Filtering using pairwise \n")
+   
 
     for alignment in alignments:
         logging.info("Filtering cluster {} of {}".format(count,len(alignments)))
@@ -310,8 +313,7 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
             if alignment_presence >= min_alignment_coverage:
                 alignments_kept_by_coverage = alignments_kept_by_coverage + 1
                 
-                alignment_percentage_identity = compute_alignment_percentage_of_identity(alignment)
-                #alignment_percentage_identity = compute_average_alignment_percentage_of_identity(alignment=alignment)
+                alignment_percentage_identity = compute_average_alignment_percentage_of_identity(alignment=alignment)
                 #alignment_percentage_identity = 1
                 
                 if alignment_percentage_identity >= min_alignment_identity:
@@ -359,7 +361,6 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
     logging.info("Discarded by identity {}".format(alignments_discarded_by_identity))
 
 
-    total_alignments = len(alignments)
     config_args.stats.set_alignments_discarded_by_length(count=alignments_discarded_by_length)
     config_args.stats.set_alignments_discarded_by_coverage(count=alignments_discarded_by_coverage)
     config_args.stats.set_alignments_discared_by_percentage_of_identity(count=alignments_discarded_by_identity)
@@ -383,17 +384,10 @@ def run_filter(config_args: Config):
                                             config_args=config_args)
     
     success = save_alignments(alignments=filtered_alignments, config_args=config_args, alignment_filename = config_args.filtered_xmfa_name)
-    #print_stats(filtered_alignments=filtered_alignments, config=config_args)
-    
 
-    #d =  load_from_json(filename = config_args.filtered_xmfa_path)
 
     filtered_alignments_reduced = reduce_sequences_in_alignments(alignments=filtered_alignments)
-    
-    alignments_discared_by_slash = len(filtered_alignments) - len(filtered_alignments_reduced)
-    config_args.stats.set_alignments_discarded_by_slash(count=alignments_discared_by_slash)
-    config_args.stats.compute_total_alignnments_kept()
-
+        
     success = save_alignments(alignments=filtered_alignments_reduced, config_args=config_args, alignment_filename = config_args.reduced_filtered_xmfa_name)
     
     end = time.time()

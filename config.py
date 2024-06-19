@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 import os
 import input_parameters as ip
+from stats import Stats
 
 
 class Config:
@@ -67,6 +68,10 @@ class Config:
         self.e_cutoff_outgroup = ip.E_CUTOFF_OUTGROUP
         self.perc_identity_outgroup = ip.PERC_IDENTITY_OUTGROUP
         self.max_hsps = 1
+
+        self.stats = Stats()
+
+        self.cleanup_days = ip.CLEANUP_DAYS
 
     def _print(self):
         print(self.data_folder)

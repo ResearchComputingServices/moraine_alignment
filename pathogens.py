@@ -452,8 +452,8 @@ def get_pathogens_from_alignments__parallel(config_args:Config):
 
     #Read outgroup files and create a genome object
     logging.info("Reding Outgroup ------------------------------------------------ \n")
-    #outgroup_genomes = read_genomes(config_args=config_args, type="Outgroup")
-    outgroup_genomes = read_genomes_duplicate(config_args=config_args, larger_size=100, type="Outgroup")
+    outgroup_genomes = read_genomes(config_args=config_args, type="Outgroup")
+    #outgroup_genomes = read_genomes_duplicate(config_args=config_args, larger_size=100, type="Outgroup")
 
 
     if len(outgroup_genomes)==0:
@@ -503,8 +503,8 @@ def get_pathogens_from_alignments__parallel(config_args:Config):
                 alignment_genomes[alignment_object.id]=alignment_object
                 count = count + 1    
 
-                if count==3:
-                    break
+                #if count==3:
+                #    break
     
     config_args.stats.total_subsequences_from_alignments = total_subsequences_from_alignments
     return alignment_genomes
