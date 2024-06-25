@@ -6,6 +6,8 @@ from utils import save_to_json, load_from_json
 import os
 import logging
 from Bio import SeqIO
+import concurrent.futures
+import math
 
 
 def reduce_sequences_in_alignments(alignments:dict):
@@ -33,6 +35,7 @@ def reduce_sequences_in_alignments(alignments:dict):
             d["genome_filename"] = alignment.get("genome_filename","")
             d["genome_length"] = alignment.get("genome_length","")
             d["genome_header"] = alignment.get("genome_header","")
+            d["percentage_identity"] = alignment.get("percentage_identity","")
             d["sequences"]= new_sequences
             alignments_with_one_sequence[number] = d
        
@@ -72,81 +75,123 @@ def compute_alignment_coverage(alignment:Alignment, max_records: int):
     return coverage_percentage
 
 
-#------------------------------------------------------------------------------------------------------------------------
-'''Computes the percentage of identity of an alignment'''
-def compute_alignment_percentage_of_identity(alignment: Alignment):
-    total_positions = alignment.get_alignment_length()
-    total_identity = 0
-    for i in range(total_positions):
-        column = alignment[:, i]
-        column_set = set(column)
-        if len(column_set) == 1 and "-" not in column:
-            total_identity = total_identity + 1
-
-    percentage_identity = (total_identity / total_positions) 
-
-    return percentage_identity
-
 
 #------------------------------------------------------------------------------------------------------------------------
-'''Computes the percentage of identity of two sequences'''
+'''Computes the percentage of identity of two sequences (alternative)'''
 def compute_pairwise_percentage_of_identity(sequence1: str, sequence2:str):
-    total_positions = min(len(sequence1), len(sequence2))
-    total_identity = 0
-    for i in range(total_positions):
-        column = [sequence1[i], sequence2[i]]
-        column_set = set(column)
-        if len(column_set) == 1 and "-" not in column:
-            total_identity = total_identity + 1
+    
+    length = len(sequence1)
 
-    percentage_identity = (total_identity / total_positions) 
+    sum = 0
+    for i in range(0,length):
+        if sequence1[i]==sequence2[i] and sequence1[i]!="-":
+            sum = sum + 1 
+
+    percentage_identity  = sum / length
 
     return percentage_identity
 
-#------------------------------------------------------------------------------------------------------------------------
-def compute_average_alignment_percentage_of_identity(alignment:Alignment):
 
+#------------------------------------------------------------------------------------------------------------------------
+def compute_average_alignment_percentage_of_identity_sequential(alignment:Alignment):
+    
     sequences = []
     for s in alignment:
         sequences.append(str(s.seq))  #If more information is needed, store the whole sequence object
     
-    i=0
-    sum_percentages = 0 
-    total_pairs = 0
-    for i in range(0, len(sequences)-1):
-        sequence_1 = sequences[i]
-        j= i + 1
-        while (j<len(sequences)):
-            #print("Pairs {},{} \n".format(i,j))
-            sequence_2 = sequences[j]
-            percentage_of_identity = compute_pairwise_percentage_of_identity(sequence1=sequence_1, sequence2=sequence_2)
-            total_pairs = total_pairs + 1 
-            sum_percentages = sum_percentages + percentage_of_identity
-            j = j + 1
+    n = len(sequences)
+    total_identity = 0
+    count = 0
     
-    avg_percentage = sum_percentages / total_pairs
-    return avg_percentage
+    for i in range(n):
+        for j in range(i + 1, n):
+            identity = compute_pairwise_percentage_of_identity(sequence1=sequences[i], sequence2=sequences[j])
+            total_identity = total_identity + identity
+            count = count + 1
+    
+    average_identity = total_identity / count if count > 0 else 0
+
+
+    
+    return average_identity
+
+
+
+#------------------------------------------------------------------------------------------------------------
+def __compute_average_percentage_of_identity(sequences:list, processor_pairs:list, config_args:Config):
+    
+    total_identity = 0
+    for pair in processor_pairs:
+        i = pair[0]
+        j = pair[1]
+        identity = compute_pairwise_percentage_of_identity(sequence1=sequences[i], sequence2=sequences[j])
+        total_identity = total_identity + identity
         
+    return total_identity
 
 
 
+
+#------------------------------------------------------------------------------------------------------------
+def compute_average_alignment_percentage_of_identity_parallel(alignment:Alignment, config_args:Config, executor):
+    
+    sequences = []
+    for s in alignment:
+        sequences.append(str(s.seq))  #If more information is needed, store the whole sequence object
+    
+    n = len(sequences) 
+    total_pairs = math.comb(n,2)
+    pairs_per_processor = math.floor(total_pairs / config_args.processors_number)
+    
+    if pairs_per_processor<1:
+        pairs_per_processor = 1
+
+    processors_jobs = []
+    pair_list = []
+    count = 0
+    processor_index = 1
+    for i in range(n):
+        for j in range(i + 1, n):
+            pair = (i,j)
+            pair_list.append(pair)
+            count = count + 1
+            if count == pairs_per_processor and processor_index<config_args.processors_number:
+                processors_jobs.append(pair_list)
+                count = 0
+                pair_list = []
+                processor_index = processor_index + 1
+    
+
+    processors_jobs.append(pair_list)
+    processor_results = []
+
+    future_results = [executor.submit(__compute_average_percentage_of_identity, sequences, processor_pairs, config_args) for processor_pairs in processors_jobs]   
+              
+    for finished in concurrent.futures.as_completed(future_results, timeout=600):
+        try:
+            processor_results.append(finished.result())
+        except concurrent.futures._base.TimeoutError:
+            logging.error("Process took to long to complete")
+        except Exception as exc:
+            logging.error("Exception occurred")
+            logging.error(exc)
+
+    sum = 0
+    for result in processor_results:
+        sum = sum + result
+
+    average_percentage_identity = sum / total_pairs
+
+    return average_percentage_identity
+    
 #------------------------------------------------------------------------------------------------------------------------
 '''Returns all the sequences (as a list of strings) contained in an alignment'''
 '''If all the sequences are identical, it will return only one sequence'''
 def get_alignment_sequences(alignment: Alignment, percentage_identity: None):
     
-    #if percentage_identity==None:
-    #    percentage_identity = 0
 
     sequences = []
-
-    #If the percentage of identity is 1 (100%) all the sequences are the same. Just return one sequence. 
-    #if percentage_identity == 1:
-     #   sequences.append(str(alignment[0].seq))
-    #else:
-    #    for s in alignment:
-    #        sequences.append(str(s.seq))  #If more information is needed, store the whole sequence object
-
+    
     for s in alignment:
         sequences.append(str(s.seq))  #If more information is needed, store the whole sequence object
     
@@ -158,44 +203,18 @@ def get_alignment_sequences(alignment: Alignment, percentage_identity: None):
 
 #------------------------------------------------------------------------------------------------------------------------
 def load_from_file(filename: str, format:str, type=None):
-        success = True
+        seq_records=None
         if os.path.isfile(filename):
             try:
-                name = os.path.basename(filename)
                 logging.info("Reading genome from file: " + filename)
                 seq_iterator = SeqIO.parse(filename, format)
                 seq_records = list(seq_iterator)
             except Exception as e:
                 logging.info(e)
-                success = False
         else:
             logging.info ("Filename %s does not exists.", filename)
-            success = False
         return seq_records
 
-
-#------------------------------------------------------------------------------------------------------------------------
-def load_file_1(filename: str):
-    success = True
-    if os.path.isfile(filename):
-        try:
-            file = open(filename)
-            line = file.readline()
-            while (line[0]!='>'):
-                try:
-                    line = file.readline()
-                    print(line)
-                except Exception as e:
-                    print(e)        
-        except Exception as e:
-            print(e)
-    else:
-        logging.info ("Filename %s does not exists.", filename)
-        success = False
-        
-    file.close()
-    
-    return success
 
 
 #------------------------------------------------------------------------------------------------------------------------
@@ -261,12 +280,13 @@ def parse_metadata_xmfa(filename: str):
     return sequence_info
 
 
-
 #------------------------------------------------------------------------------------------------------------------------
 '''Filters all alignments on a xmfa file based on three parameters: elenght, coverage, and identity'''
 '''Returns the filtered alignments as a dictionary'''
 '''Saves the alignments as a json file into a location'''
-def filter_alignments(alignments_file: str, min_alignment_length: int, min_alignment_coverage: int, min_alignment_identity: float, ingroup_size:int, config_args:Config):
+def filter_alignments_parallel(alignments_file: str, min_alignment_length: int, min_alignment_coverage: int, min_alignment_identity: float, ingroup_size:int, config_args:Config):
+
+    executor = concurrent.futures.ProcessPoolExecutor(max_workers=config_args.processors_number)
 
     filtered_alignments = {}
     
@@ -302,7 +322,8 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
    
 
     for alignment in alignments:
-        logging.info("Filtering cluster {} of {}".format(count,len(alignments)))
+        logging.info("Filtering cluster  {} of {}".format(count,len(alignments)))
+        
         alignment_length = compute_alignment_length(alignment=alignment)
         
         if alignment_length >= min_alignment_length:
@@ -313,8 +334,7 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
             if alignment_presence >= min_alignment_coverage:
                 alignments_kept_by_coverage = alignments_kept_by_coverage + 1
                 
-                alignment_percentage_identity = compute_average_alignment_percentage_of_identity(alignment=alignment)
-                #alignment_percentage_identity = 1
+                alignment_percentage_identity = compute_average_alignment_percentage_of_identity_parallel(alignment=alignment, config_args=config_args, executor=executor)
                 
                 if alignment_percentage_identity >= min_alignment_identity:
                     alignments_kept_by_identity = alignments_kept_by_identity + 1
@@ -322,12 +342,13 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
                     id = alignment[0].id
                     alignment_id = id.split()[0]
                     alignment_number = alignment_id[7:len(alignment_id)]
-                    d = {}
+                    d = {}  
                     d["id"] = id
                     d["name"] = alignment[0].name
                     d["strand"] = alignment[0].annotations['strand']
                     d["sequences"]= get_alignment_sequences(alignment=alignment, percentage_identity=alignment_percentage_identity)
-                    
+                    d["percentage_identity"] = alignment_percentage_identity
+
                     try:
                         sequence_index = int(d.get("name",0))
                         if sequence_index in alignment_info:
@@ -367,7 +388,6 @@ def filter_alignments(alignments_file: str, min_alignment_length: int, min_align
 
     return filtered_alignments
 
-
 #----------------------------------------
 '''Runs the filter alignments'''
 def run_filter(config_args: Config):
@@ -375,14 +395,14 @@ def run_filter(config_args: Config):
     filtered_alignments = {}
     start = time.time()
     
-    
-    filtered_alignments = filter_alignments(alignments_file=config_args.xmfa_file_path, 
+    filtered_alignments = filter_alignments_parallel(alignments_file=config_args.xmfa_file_path, 
                                             min_alignment_length = config_args.minimum_alignment_length, 
                                             min_alignment_coverage = config_args.minimum_alignment_coverage,
                                             min_alignment_identity =  config_args.minimum_alignment_percentage_identity,
                                             ingroup_size=config_args.ingroup_size,
                                             config_args=config_args)
-    
+            
+
     success = save_alignments(alignments=filtered_alignments, config_args=config_args, alignment_filename = config_args.filtered_xmfa_name)
 
 

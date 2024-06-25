@@ -2,27 +2,27 @@ DATA_FOLDER = "/data"
 MULTIFASTA_FOLDER = "Multifasta/"
 IN_PROCESS_FOLDER = "in_process"
 TEMP_FOLDER = "Temp/"
-INGROUP_FOLDER = "Ingroup_Wong/"
+INGROUP_FOLDER = "Ingroup_Echoli_1000"
 OUTGROUP_FOLDER = "Outgroup_Wong/"
 OUTPUT_FOLDER = "Output/"
 OUTPUT_PARSNP_FOLDER = "Output_parsnp/"
 
-INGROUP_SIZE = 3
+INGROUP_SIZE = 10
 OUTGROUP_SIZE = 4
 
 #Filtering parameters for the parsnp alignment
 MINIMUM_ALIGNMENT_LENGTH = 300                   #Minimum sequence length in an alignment
 MINIMUM_ALIGNMENT_COVERAGE = 0.99                #Minimum percentage of genomes that there should be an alignment values from [0,1]
-MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 0.8  
+MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 0.99  
 
 
 #Add the location of the parsnp file to avoid re-run parsnp
-#PARSNP_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output_parsnp/test/parsnp.xmfa"
+#PARSNP_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output_parsnp/Ingroup_3_Outgroup_4/parsnp.xmfa"
 #FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/filtered_test_2/filtered_parsnp.json"
-#PARSNP_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output_parsnp/2024_06_17_13_09/parsnp.xmfa"
+#PARSNP_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output_parsnp/Ingroup_500_Outgroup_500/parsnp.xmfa"
 PARSNP_XMFA_FILE_LOCATION = ""
 FILTERED_XMFA_FILE_LOCATION = ""
-#FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/2024_06_19_11_56/reduced_filtered_parsnp.json"
+#FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/2024_06_19_16_25/reduced_filtered_parsnp.json"
 #FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/2024_06_10_11_16/reduced_filtered_parsnp.json"
 #FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/2024_06_10_10_38/reduced_filtered_parsnp.json"
 

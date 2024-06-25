@@ -76,7 +76,8 @@ class Alignment:
                  format=None,
                  genome_filename=None,
                  genome_header=None,
-                 genome_length=None):
+                 genome_length=None,
+                 percentage_identity = None):
         
         self.id = str(uuid.uuid4())
         self.sequence = sequence
@@ -87,6 +88,7 @@ class Alignment:
         self.type=""
         self.length=length
         self.position_in_genome = 0
+        self.percentage_of_identity = percentage_identity
     
         self.genome_filename = genome_filename
         self.genome_header = genome_header

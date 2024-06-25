@@ -135,6 +135,7 @@ def candidates_main(pathogen_candidates:List[Alignment]):
             d["Outgroup Hits"] = len(subsequence.outgroup_hits)
             d["Subsequence position in Genome"] = subsequence.position_in_genome
             #d["Outgroup Score"] = "TBC"
+            d["Percentage of Identity"] = genome.percentage_of_identity
             d["Alignment Info"] = genome.description
             d["Alignment Strand"] = genome.strand
             #d["Alignment Position in Genome"] = genome.position_in_genome 
@@ -154,8 +155,8 @@ def candidates_main(pathogen_candidates:List[Alignment]):
     
     main_fr_t = main_fr.T
     try:
-        #main_fr_t_s = main_fr_t.sort_values(['Outgroup Hits', 'Outgroup Score'], ascending=[True, True])
-        main_fr_t_s = main_fr_t.sort_values(['Outgroup Hits'], ascending=[True])
+        main_fr_t_s = main_fr_t.sort_values(['Outgroup Hits', 'Percentage of Identity'], ascending=[True, False])
+        #main_fr_t_s = main_fr_t.sort_values(['Outgroup Hits'], ascending=[True])
     except Exception as e:
         logging.info(e)
         #print(e)

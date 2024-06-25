@@ -240,89 +240,6 @@ def map_blast_results_to_genome(genome: Genome, blast_results:dict):
 
 
 
-'''Blast the set of subsequences of a genome against a genome sequence'''
-def blast_subsequences_against_genomes(genomes_query: List[Genome], 
-                                       genomes_subject: List[Genome], 
-                                       query_subseq_fasta_paths: List[str], 
-                                       subject_sequence_fasta_paths: List[str],          
-                                       config_args: Config = None):
-    start = time.time()
-    
-    #cluster_run = False
-
-
-    executor = concurrent.futures.ProcessPoolExecutor(max_workers=config_args.processors_number)
-
-    for query_index  in range(0,len(genomes_query)):
-        
-        #print ("Genome {}".format(query_index))
-        query_genome_id = genomes_query[query_index].id
-        query_genome_description = genomes_query[query_index].description
-        
-        #Get the file with the subsequences filepaths corresponding to blast
-        if query_genome_id not in query_subseq_fasta_paths:
-            continue
-        
-        query_fasta_paths = query_subseq_fasta_paths[query_genome_id]
-        
-        subject_index = 0
-        for subject_genome_id, subject_genome in genomes_subject.items():
-
-            subject_fasta = subject_sequence_fasta_paths[subject_genome_id]
-            subject_genome_filename = subject_genome.filename
-            subject_genome_sequence = ""
-            
-            #We don't want to blast a genome against itself
-            if (query_genome_id!=subject_genome_id):
-                
-                logging.info("Blast -> subs in Alignment-{}_{} - Outgroup-{}_{}".format(query_index,query_genome_description,subject_index,subject_genome_filename))
-                #logging.info("Blast -> Query {} - Subject {} ".format(query_index,subject_genome_fasta_file))
-                
-                #for fp in file_paths:
-                #    ncbi_blast_multifasta(query_file=fp, subject_file=subject_genome_fasta_file, subject_id=subject_genome_id, subject_sequence=subject_genome_sequence, e_cutoff=config_args.e_cutoff_outgroup,
-                #                          identity_perc_cutoff=config_args.perc_identity_outgroup,max_hsps=config_args.max_hsps,config_args=config_args)
-
-
-                processors_results = []
-                future_results = [executor.submit(ncbi_blast_multifasta, fp, subject_fasta, subject_genome_sequence, subject_genome_id, config_args.e_cutoff_outgroup, config_args.perc_identity_outgroup, config_args.max_hsps) for fp in query_fasta_paths]
-    
-                for finished in concurrent.futures.as_completed(future_results, timeout=600):
-                    try:
-                        processors_results.append(finished.result())
-                        #logging.info(finished.result())
-                    except concurrent.futures._base.TimeoutError:
-                        logging.error("Process took to long to complete")
-                        #print("Process took to long to compete")
-                    except Exception as exc:
-                        logging.error("Exception occurred")
-                        logging.error(exc)
-                        #print ("Exception occurred: ")
-                        #print (exc)
-
-                for blast_results in processors_results:
-                    map_blast_results_to_genome(genome=genomes_query[query_index], blast_results=blast_results)
-                    #save_blast_result(blast_results=blast_results)
-
-
-            subject_index  = subject_index + 1   
-                        
-    #logging.info("total json files: {}.".format(total_json_files))            
-    end = time.time()
-    mins = (end-start)/60
-    
-    logging.info("Blast mins {}".format(mins))
-
-
-
-
-
-
-
-
-
-
-
-
 #Parallelization by outgroup
 #Each processor will blast the subsequences of an alignment to the outgroup' sequence
 #---------------------------------------------------------------------------------------------------------------------------------------------
@@ -385,8 +302,7 @@ def blast_query_subsequences_vs_outgroup(config_args:Config, query_fasta_paths:L
             #--------------------------------------------------------------
 
             if processor_index>=config_args.processors_number or subject_index>=total_subjects:
-                #processors_results = blast_multifasta_files_vs_subject(subject_info=subject_info, query_fasta_paths=query_fasta_paths, config_args=config_args)
-    
+               
                 #logging.info("Call {}".format(calls))
                 future_results = [executor.submit(blast_multifasta_files_vs_subject, subject_info, query_fasta_paths, config_args) for subject_info in processors_tasks]   
               
@@ -424,7 +340,7 @@ def blast_query_subsequences_vs_outgroup(config_args:Config, query_fasta_paths:L
 
 '''Blast the set of subsequences of a genome against a genome sequence'''
 '''Parallelized by Outgroup'''
-def blast_subsequences_against_genomes__parallel(genomes_query: List[Genome], 
+def blast_subsequences_against_genomes(genomes_query: List[Genome], 
                                        genomes_subject: List[Genome], 
                                        query_subseq_fasta_paths: List[str], 
                                        subject_sequence_fasta_paths: List[str],          

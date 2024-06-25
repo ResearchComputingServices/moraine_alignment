@@ -71,8 +71,7 @@ def main():
 
     
     if success:
-        alignment_genomes = pathogens.get_pathogens_from_alignments__parallel(config_args=config_args)
-        #alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
+        alignment_genomes = pathogens.get_pathogens_from_alignments(config_args=config_args)
         end = time.time()
         mins = (end-start)/60
         config_args.stats.end_time =end
