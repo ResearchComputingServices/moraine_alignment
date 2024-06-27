@@ -2,7 +2,7 @@ import os
 from config import Config
 from parsnp_alignment import run_parsnp
 from alignments_filter import run_filter
-from utils import delete_files, get_today_datetime,create_dir
+from utils import delete_files, get_today_datetime,create_dir, unzip_folder, cleanup_folder, remove_folder_older_than
 from ncbi_blast import run_blast
 import logging
 import time
@@ -98,6 +98,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-   
-    #run_blast()    
+    #main()
+    cleanup_folder("/home/jazminromero/alignment/Output_parsnp", days=0)

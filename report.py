@@ -102,8 +102,8 @@ def stats_page(config_args:Config):
     
 
     header_dict["Total Subsequences From Alignments: "] = config_args.stats.total_subsequences_from_alignments
-    header_dict["Total Candidates: "] = config_args.stats.total_candidates
-    header_dict["Candidates Percentage: "] = config_args.stats.percentage_candidates
+    #header_dict["Total Candidates: "] = config_args.stats.total_candidates
+    #header_dict["Candidates Percentage: "] = config_args.stats.percentage_candidates
 
     header_dict["Parsnp runtime: "] =  config_args.stats.parsnp_runtime
     header_dict["Filtering runtime: "] = config_args.stats.filtering_runtime

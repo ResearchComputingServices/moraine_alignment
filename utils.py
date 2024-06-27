@@ -2,7 +2,10 @@ import logging
 import os
 from datetime import datetime
 from zipfile import ZipFile
+import shutil
 import json
+from sys import platform
+
 
 
 ####################################################################################################
@@ -104,7 +107,7 @@ def get_files_in_dir(folder_path: str) -> list:
 
 
 
-
+####################################################################################################
 def get_files_in_dir_recursive(folder_path: str) -> list:
     try:
         file_path_list = []
@@ -122,7 +125,7 @@ def get_files_in_dir_recursive(folder_path: str) -> list:
 
 
 
-
+####################################################################################################
 def clear_file_paths(file_paths: list) -> list:
     clear_list = []
     for path in file_paths:
@@ -134,7 +137,7 @@ def clear_file_paths(file_paths: list) -> list:
     return clear_list
 
 
-
+####################################################################################################
 def get_sublist(ori_list: list, size: int) -> list:
     
     if size == None:
@@ -177,6 +180,7 @@ def zip_directory(output_dir, zip_dir):
         logging.info(e)
 
 
+####################################################################################################
 '''Get files in directory visiting all subdirectories'''
 def get_files_in_dir_recursive(folder_path: str) -> list:
     try:
@@ -199,7 +203,7 @@ def get_files_in_dir_recursive(folder_path: str) -> list:
     return file_path_list
 
 
-
+####################################################################################################
 '''Returns true if a folder has subfolders'''
 def has_subfolders(folder_path: str) -> bool:
     subfolders = False
@@ -218,9 +222,115 @@ def has_subfolders(folder_path: str) -> bool:
     return subfolders
 
 
+####################################################################################################
+'''Unzip a folder (zip_path) and place it the files into a specific location (dest_path)'''
+def unzip_folder(zip_path:str, dest_path:str):
+
+    success = True
+    if os.path.isfile(zip_path):
+        
+        supported_formats = ['.zip']
+        
+        if os.path.splitext(zip_path)[1] not in supported_formats:
+            logging.error("The file is not a zip file.")
+            success = False
+            return  success
+        
+        try:
+            _format = os.path.splitext(zip_path)[1][1:]
+            dir_path = os.path.splitext(zip_path)[0]
+            if not os.path.isdir(dest_path):
+                dest_path=dir_path
+
+            shutil.unpack_archive(zip_path, dest_path, _format)
+            #zip_path = dir_path
+        except Exception as e:
+            logging.info ("Error when unzip file")
+            logging.info(e)
+            success = False
+    else:
+        logging.info("The path does not exists.")
+        success = False
+    
+    return success
 
 
 
 
+####################################################################################################
+def remove_file_older_than(filepath, days):
+    old_days=-1
+    if os.path.isfile(filepath):
+        if days >= 0:
+            if platform == "linux" or platform == "linux2":
+                file_created_datetime = os.stat(filepath).st_ctime
+            elif platform == "darwin":
+                file_created_datetime = os.stat(filepath).st_birthtime
+            current_datetime = datetime.timestamp(datetime.now())
+            dif = current_datetime - file_created_datetime  # Dif in seconds between two days
+            # 86400 = Number of secs in 1 day
+            old_days = dif / 86400
+            # print(old_days)
+            if old_days >= days:
+                try:
+                    os.remove(filepath)
+                    # print ('File removed')
+                except OSError as e:
+                    logging.error("Error: %s : %s" % (filepath, e.strerror))
+    return old_days
 
-  
+
+####################################################################################################
+def remove_folder_older_than(folder, days=None):
+    
+    if not os.path.exists(folder):
+        return
+
+    if not days or days<0:
+        days = 0
+    try:
+        if platform == "linux" or platform == "linux2":
+            file_created_datetime = os.stat(folder).st_ctime
+        elif platform == "darwin":
+            file_created_datetime = os.stat(folder).st_birthtime
+        
+        current_datetime = datetime.timestamp(datetime.now())
+        dif = current_datetime - file_created_datetime  # Dif in seconds between two days
+        # 86400 = Number of secs in 1 day
+        old_days = dif / 86400
+        # print(old_days)
+        if old_days >= days:
+            try:
+                shutil.rmtree(folder)
+            except Exception as e:
+                logging.error(e)
+    except Exception as e:
+        print(e)          
+
+
+####################################################################################################
+def cleanup_folder(folder, days=None):
+    try:
+        if not os.path.exists(folder):
+            return
+
+        if not days or days<0:
+            days = 0
+
+        for path in os.listdir(folder):
+            if not path.startswith('.'):
+                # It is directory (folder)
+                fullpath = os.path.join(folder, path)
+                if os.path.isdir(fullpath):
+                    remove_folder_older_than(folder=fullpath, days=days)
+                else:
+                    if os.path.isfile(fullpath):
+                        remove_file_older_than(filepath=fullpath, days=days)
+
+    except OSError as e:
+        print("Error: %s : %s" % (folder, e.strerror))
+
+            
+
+
+

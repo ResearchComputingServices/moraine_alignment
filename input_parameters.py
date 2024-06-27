@@ -7,7 +7,7 @@ OUTGROUP_FOLDER = "Outgroup_Wong/"
 OUTPUT_FOLDER = "Output/"
 OUTPUT_PARSNP_FOLDER = "Output_parsnp/"
 
-INGROUP_SIZE = 10
+INGROUP_SIZE = 500
 OUTGROUP_SIZE = 4
 
 #Filtering parameters for the parsnp alignment
