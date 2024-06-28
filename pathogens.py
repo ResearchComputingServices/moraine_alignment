@@ -409,9 +409,6 @@ def get_pathogens_from_alignments(config_args:Config):
                 alignment_genomes[alignment_object.id]=alignment_object
                 count = count + 1    
 
-                #if count==3:
-                #    break
-    
     config_args.stats.total_subsequences_from_alignments = total_subsequences_from_alignments
     return alignment_genomes
 

@@ -98,5 +98,5 @@ def main():
 
 
 if __name__ == '__main__':
-    #main()
-    cleanup_folder("/home/jazminromero/alignment/Output_parsnp", days=0)
+    main()
+    

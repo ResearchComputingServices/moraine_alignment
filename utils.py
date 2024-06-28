@@ -305,7 +305,7 @@ def remove_folder_older_than(folder, days=None):
             except Exception as e:
                 logging.error(e)
     except Exception as e:
-        print(e)          
+        logging.error(e)          
 
 
 ####################################################################################################
@@ -327,8 +327,8 @@ def cleanup_folder(folder, days=None):
                     if os.path.isfile(fullpath):
                         remove_file_older_than(filepath=fullpath, days=days)
 
-    except OSError as e:
-        print("Error: %s : %s" % (folder, e.strerror))
+    except Exception as e:
+        logging.error("Error: %s : %s" % (folder, e.strerror))
 
             
 

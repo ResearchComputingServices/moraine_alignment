@@ -410,6 +410,8 @@ def run_filter(config_args: Config):
         
     success = save_alignments(alignments=filtered_alignments_reduced, config_args=config_args, alignment_filename = config_args.reduced_filtered_xmfa_name)
     
+    config_args.stats.compute_total_alignnments_kept()
+    
     end = time.time()
     mins = (end-start)/60
     
