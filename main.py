@@ -30,7 +30,7 @@ def setup_run():
     config_args = Config()
    
     #Verify output paths exit; otherwise create them.
-    for path in [config_args.temp_path, config_args.output_path, config_args.output_parsnp_path]:
+    for path in [config_args.temp_path, config_args.output_path, config_args.output_parsnp_path, config_args.multifasta_path, config_args.in_process_path]:
         os.makedirs(path, exist_ok=True)
 
     #Create results folder
