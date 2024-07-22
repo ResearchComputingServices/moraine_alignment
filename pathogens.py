@@ -223,7 +223,7 @@ def verify_outgroup_folder(config_args:Config):
     
     #The ingroup size was not specified, set it to the count of files in the directory
     if config_args.outgroup_size==None:
-        config_args.ingroup_size = len(genome_filepaths)
+        config_args.outgroup_size = len(genome_filepaths)
 
     #We will copy the files to a different location if the ingroup location has directories
     #or if the ingroup size specified is less than the number of files in the ingroup directory

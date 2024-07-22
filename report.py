@@ -11,6 +11,7 @@ from Bio.Seq import Seq
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 '''Removes subsequences that have hits with more than max_percentage_genomes% in the outgroup'''
+
 def filter_subsequences_with_maximum_hits(alignments:list, outgroup_size:int, max_percentage_genomes=None):
     
     if max_percentage_genomes==None:
@@ -18,7 +19,7 @@ def filter_subsequences_with_maximum_hits(alignments:list, outgroup_size:int, ma
     
     max_allowed_genomes = round(outgroup_size*(max_percentage_genomes/100))
 
-    for alignment in alignments:
+    for key, alignment in alignments.items():
         subsequences_to_keep = []
         for subsequence in alignment.subsequences:
             counter_genomes_hit=0
@@ -40,7 +41,7 @@ def create_multifasta_file_for_list(alignments: List[Alignment], config_args:Con
     list = []    
     fasta_file_path = ""
 
-    filter_subsequences_with_maximum_hits(alignments=alignments, outgroup_size=config_args.outgroup_size) 
+    filter_subsequences_with_maximum_hits(alignments=alignments, outgroup_size=config_args.outgroup_size, max_percentage_genomes=config_args.outgroup_filter_percentage) 
 
     for id, alignment in alignments.items():
         for sequence in alignment.subsequences:
