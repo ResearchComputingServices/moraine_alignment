@@ -1,4 +1,4 @@
-#Do NOT change these parameters.
+#Do NOT change these parameters (lines 2-7).
 DATA_FOLDER = "/data"
 MULTIFASTA_FOLDER = "Multifasta/"
 IN_PROCESS_FOLDER = "in_process"
@@ -35,4 +35,4 @@ FORMAT = "fasta"
 CLEANUP_DAYS = 60
 
 #Maximum percentage of matches (0-100) 0 = There should be zero hits, and 100 we allow all the hits
-OUTGROUP_FILTER_PERCENTAGE = 25
+OUTGROUP_FILTER_PERCENTAGE = 50
