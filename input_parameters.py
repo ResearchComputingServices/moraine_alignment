@@ -7,20 +7,20 @@ OUTPUT_FOLDER = "Output/"
 OUTPUT_PARSNP_FOLDER = "Output_parsnp/"
 
 #Ingroup and Outgroup folders WITHOUT path
-INGROUP_FOLDER = "Ingroup_Echoli_1000"
-OUTGROUP_FOLDER = "Outgroup_Wong/"
+INGROUP_FOLDER = "Ingroup_Demo"
+OUTGROUP_FOLDER = "Outgroup_Demo"
 
 INGROUP_SIZE = None         #Leave None to use all genomes in the ingroup folder or specify the number of genomes to use
 OUTGROUP_SIZE = None        #Leave None to use all genomes in the outgroup  folder or specify the number of genomes to use
 
 #Filtering parameters for the parsnp alignment
 MINIMUM_ALIGNMENT_LENGTH = 300                   #Minimum sequence length in an alignment
-MINIMUM_ALIGNMENT_COVERAGE = 0.99                #Minimum percentage of genomes that there should be an alignment values from [0,1]
-MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 0.99  
+MINIMUM_ALIGNMENT_COVERAGE = 99                  #Minimum percentage of genomes that there should be an alignment values from [0,100]
+MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 99  
 
 #Add the location of the parsnp file to avoid re-run parsnp
 PARSNP_XMFA_FILE_LOCATION = ""
-FILTERED_XMFA_FILE_LOCATION = "/home/jazminromero/alignment/Output/2024_07_18_15_25/reduced_filtered_parsnp.json"
+FILTERED_XMFA_FILE_LOCATION = ""
 
 #Maximum sequence length for a sequence alignment to be blast
 SEQUENCE_LENGTH = 300

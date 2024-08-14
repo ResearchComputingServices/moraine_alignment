@@ -39,8 +39,8 @@ class Config:
         self.outgroup_size = ip.OUTGROUP_SIZE
 
         self.minimum_alignment_length = ip.MINIMUM_ALIGNMENT_LENGTH
-        self.minimum_alignment_coverage = ip.MINIMUM_ALIGNMENT_COVERAGE
-        self.minimum_alignment_percentage_identity = ip.MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY
+        self.minimum_alignment_coverage = ip.MINIMUM_ALIGNMENT_COVERAGE/100
+        self.minimum_alignment_percentage_identity = ip.MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY/100
 
         self.format = ip.FORMAT
         self.sequence_length = ip.SEQUENCE_LENGTH
@@ -88,7 +88,7 @@ class Config:
             raise ValueError("results_path is not defined")
         else:
             os.makedirs(self.results_path, exist_ok=True)
-            with open(os.path.join(self.results_path, "config.txt"), "w", encoding='utf-8') as f:
+            with open(os.path.join(self.results_path, "config_parameters.txt"), "w", encoding='utf-8') as f:
                 json.dump(variables, f, indent=2)
 
     def _print(self):
