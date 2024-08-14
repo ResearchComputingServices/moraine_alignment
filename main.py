@@ -37,6 +37,8 @@ def setup_run():
     dir_name = get_today_datetime()
     results_path = create_dir(config_args.output_path,dir_name)
     config_args.results_path = results_path
+    # Write the config file to the results folder
+    config_args.to_file()
 
     #Setup the logs
     config_logging(log_dir=results_path)
