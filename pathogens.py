@@ -10,7 +10,7 @@ from Bio import SeqIO
 from utils import load_from_json
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-from ncbi_blast import blast_subsequences_against_genomes, blast_subsequences_against_genomes
+from ncbi_blast import blast_subsequences_against_genomes
 import math
 
 
