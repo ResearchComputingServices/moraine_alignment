@@ -3,11 +3,13 @@ import logging
 from genome import Genome
 from genome import Alignment
 from config import Config
-from utils import *
 from typing import List
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
+import os
+from utils import get_today_datetime
+from utils import generate_filename
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 '''Removes subsequences that have hits with more than max_percentage_genomes% in the outgroup'''
@@ -129,11 +131,11 @@ def stats_page(config_args: Config):
     return header_fr_t
 
 
-def candidates_main(pathogen_candidates: List[Alignment]):
+def candidates_main(unique_sequences: List[Alignment]):
 
     main_dict = {}
     index = 0
-    for id, genome in pathogen_candidates.items():
+    for id, genome in unique_sequences.items():
         for subsequence in genome.subsequences:
             d = {}
             # d["Subsequence Id"]=subsequence.id
@@ -172,7 +174,7 @@ def candidates_main(pathogen_candidates: List[Alignment]):
 
 # ----------------------------------------------------------------------------------------------------
 def create_general_report(config_args: Config,
-                          pathogen_candidates: List[Genome],
+                          unique_sequences: List[Genome],
                           mins: float):
 
     logging.info(
@@ -184,11 +186,11 @@ def create_general_report(config_args: Config,
     # General information
     # Create header dataframe
     header_fr = general_header(config_args=config_args, total_time=mins)
-    header_fr.to_excel(writer, sheet_name="Pathogens Candidates", index=True)
+    header_fr.to_excel(writer, sheet_name="Unique Sequences", index=True)
 
     # All candidates in one sheet
-    sheet_name = "Pathogens Candidates"
-    main_fr = candidates_main(pathogen_candidates=pathogen_candidates)
+    sheet_name = "Unique Sequences"
+    main_fr = candidates_main(unique_sequences=unique_sequences)
     if not main_fr.empty:
         main_fr.to_excel(writer, startrow=18,
                          sheet_name=sheet_name, index=False, header=True)
@@ -207,7 +209,7 @@ def create_general_report(config_args: Config,
     writer.close()
 
     create_multifasta_file_for_list(
-        alignments=pathogen_candidates, config_args=config_args)
+        alignments=unique_sequences, config_args=config_args)
     # zip_directory(output_dir=results_dir_name, zip_dir=results_dir_name)
 
     return filename_path

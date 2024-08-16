@@ -4,15 +4,16 @@ from sys import platform
 from config import Config
 
 
-
-#-----------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 def remove_file(filename):
     if os.path.exists(filename):
         os.remove(filename)
 
-#-----------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+
+
 def remove_file_older_than(filepath, days):
     if os.path.isfile(filepath):
         if days > 0:
@@ -35,8 +36,8 @@ def remove_file_older_than(filepath, days):
             remove_file(filepath)
 
 
-#-----------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 def clean_history(folder, days=None):
     try:
         if not os.path.exists(folder):
@@ -69,32 +70,35 @@ def clean_history(folder, days=None):
     except OSError as e:
         print("Error: %s : %s" % (folder, e.strerror))
 
-#-----------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
     config_args = Config()
-    
-    if config_args==None:
+
+    if config_args == None:
         print("Script couldn't be executed. Check input_parameters or config")
     else:
-    
+
         current_datetime = datetime.now()
         dt_string = current_datetime.strftime("%d/%m/%Y %H:%M:%S")
         print("Script started at:", dt_string)
 
-        print ('Removing {0} days old files from {1}'.format(config_args.cleanup_days, config_args.output_folder))
-        clean_history(folder=config_args.output_folder, days=config_args.cleanup_days)
-        
-        print ('Removing {0} days old files from {1}'.format(config_args.cleanup_days, config_args.output_parsnp_folder))
-        clean_history(folder=config_args.output_parsnp_folder, days=config_args.cleanup_days)
-        
-        #Remove log files
-        #print('Removing {0} days old files from {1}'.format(logs_days, logs_folder))
-        #Remove log files
-        
+        print('Removing {0} days old files from {1}'.format(
+            config_args.cleanup_days, config_args.output_folder))
+        clean_history(folder=config_args.output_folder,
+                      days=config_args.cleanup_days)
+
+        print('Removing {0} days old files from {1}'.format(
+            config_args.cleanup_days, config_args.output_parsnp_folder))
+        clean_history(folder=config_args.output_parsnp_folder,
+                      days=config_args.cleanup_days)
+
+        # Remove log files
+        # print('Removing {0} days old files from {1}'.format(logs_days, logs_folder))
+        # Remove log files
+
         current_datetime = datetime.now()
         dt_string = current_datetime.strftime("%d/%m/%Y %H:%M:%S")
         print("Script ended at:", dt_string)
-
-
