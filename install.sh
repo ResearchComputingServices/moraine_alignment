@@ -15,7 +15,7 @@ PATHCMD="export PATH=\$PATH:$HOME/ncbi-blast-${BLASTVERSION}+/bin"
 grep -qxF "$PATHCMD" $HOME/.bashrc || echo $PATHCMD >> $HOME/.bashrc
 
 [ -d $HOME/blastdb ] || mkdir $HOME/blastdb
-export export BLASTDB=$HOME/blastdb
+export BLASTDB=$HOME/blastdb
 BLASTDBCMD="export BLASTDB=\$HOME/blastdb"
 grep -qxF "$BLASTDBCMD" $HOME/.bashrc || echo $BLASTDBCMD >> $HOME/.bashrc
 
