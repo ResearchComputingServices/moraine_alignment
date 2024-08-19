@@ -29,6 +29,34 @@ python main.py ...
 
 A detailed manual on how to use this software can be found in [here](#doc/manual.docx)
 
+<details>
+<summary><h2 style="display:inline-block">Running this code on a virtual machine (VM)?</h2></summary>
+
+The time to process this code can become long. When running this code on a VM, you may stop the code from running if you disconnect from the server, either voluntarely or involutarely.
+
+To run the application in the background and detach it from the current terminal session, you can use the `nohup` command. Here's how you can modify the command to use `nohup`:
+
+```bash
+nohup python main.py ...
+```
+
+This will prevent the application from being terminated when you close the terminal session. The output of the application will be redirected to a file named `nohup.out` in the current directory.
+
+Remember to replace `...` with the appropriate command-line arguments for your application.
+
+You can check the progress and any error messages by viewing the `nohup.out` file using the `tail` command:
+
+```bash
+tail -f nohup.out
+```
+
+Make sure to monitor the progress of the application and check the `nohup.out` file periodically.
+
+For more information on using `nohup`, you can refer to the [man page](https://man7.org/linux/man-pages/man1/nohup.1.html).
+
+</details>
+
+
 ## <a name="thirdpartysoftware">Third party software</a>
 Parsnp should be installed following the instructions in:
 https://github.com/marbl/parsnp
