@@ -1,4 +1,5 @@
-import shlex, subprocess
+import shlex
+import subprocess
 import os
 import time
 from Bio.Blast.Applications import NcbiblastnCommandline
@@ -318,8 +319,10 @@ def ncbi_blast_multifasta(
             # Create subject fasta file
             subject_file_name = str(uuid.uuid4()) + ".fasta"
             os.makedirs(config_args.TEMP_PATH, exist_ok=True)
-            subject_file = os.path.join(config_args.TEMP_PATH, subject_file_name)
-            subject_sequence_record = SeqRecord(Seq(subject_sequence), id="subject")
+            subject_file = os.path.join(
+                config_args.TEMP_PATH, subject_file_name)
+            subject_sequence_record = SeqRecord(
+                Seq(subject_sequence), id="subject")
             SeqIO.write(subject_sequence_record, subject_file, "fasta")
             delete_file = True
         else:
@@ -601,27 +604,3 @@ def blast_subsequences_against_genomes(
     config_args.stats.blast_runtime = config_args.stats.blast_runtime + mins
 
     logging.info("Blast mins {}".format(mins))
-
-
-def run_blast():
-    """
-    Run NCBI BLAST with the given query and subject files.
-
-    Keyword arguments:
-        query_file (str): Path to the query file.
-        subject_file (str): Path to the subject file.
-        e_cutoff (float): E-value cutoff for BLAST results. Default is 1E-40.
-        identity_perc_cutoff (float): Identity percentage cutoff for BLAST results. Default is 90.
-        max_hsps (int): Maximum number of HSPs (High-scoring Segment Pairs) to report. Default is 1.
-    """
-
-    query_file = "/data/Test/my_query.fasta"
-    subject_file = "/data/Test/my_subject.fasta"
-
-    ncbi_blast_bio(
-        query_file=query_file,
-        subject_file=subject_file,
-        e_cutoff=1e-40,
-        identity_perc_cutoff=90,
-        max_hsps=1,
-    )
