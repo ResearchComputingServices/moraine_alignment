@@ -7,3 +7,4 @@ __pycache__
 .env.shared
 .venv
 *.json
+ncbi-blast*
