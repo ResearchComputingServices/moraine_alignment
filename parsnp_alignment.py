@@ -9,7 +9,8 @@ from utils import (
 )
 import shutil
 import os
-import shlex, subprocess
+import shlex
+import subprocess
 import logging
 import time
 from stats import Stats
@@ -37,8 +38,7 @@ def parsnp_wrapper(
 
     result = None
     try:
-        # command = "./parsnp -r " + reference_genome_with_path +  " -d " + input_directory +  " -o " + output_directory
-        # the -c forces all the genomes in the input_directory to be included in the alignment
+        # -c forces all the genomes in the input_directory to be included in the alignment
         command = (
             "parsnp  -p"
             + str(number_threads)
@@ -52,7 +52,6 @@ def parsnp_wrapper(
         )
         logging.info(command)
         args = shlex.split(command)
-        # result = subprocess.run(args, capture_output=True, text=True)
         result = subprocess.call(args)
     except Exception as e:
         logging.error(e)
@@ -74,7 +73,8 @@ def verify_ingroup_folder(config_args: Config):
 
     proceed = False
 
-    genome_filepaths = get_files_in_dir_recursive(folder_path=config_args.ingroup_path)
+    genome_filepaths = get_files_in_dir_recursive(
+        folder_path=config_args.ingroup_path)
 
     # There aren't files to process
     if len(genome_filepaths) <= 0:
@@ -100,7 +100,8 @@ def verify_ingroup_folder(config_args: Config):
         if os.path.isdir(new_ingroup_path):
 
             logging.info(
-                "Copying files into temporal directory: {}".format(new_ingroup_path)
+                "Copying files into temporal directory: {}".format(
+                    new_ingroup_path)
             )
             # Copy files to temporary directory
             count = 0
@@ -156,12 +157,14 @@ def run_parsnp(config_args: Config, reference_genome: str = None):
             output_directory=xmfa_filepath,
             number_threads=config_args.parsnp_number_threads,
         )
-        xmfa_filelocation = os.path.join(xmfa_filepath, config_args.xmfa_file_name)
+        xmfa_filelocation = os.path.join(
+            xmfa_filepath, config_args.xmfa_file_name)
         if output == 0 or os.path.isfile(xmfa_filelocation):
             success = True
             config_args.xmfa_file_path = xmfa_filelocation
             logging.info("Parsnp completed succesfully")
-            logging.info("xmfa location: {}".format(config_args.xmfa_file_path))
+            logging.info("xmfa location: {}".format(
+                config_args.xmfa_file_path))
 
     end = time.time()
     mins = (end - start) / 60

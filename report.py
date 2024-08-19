@@ -3,34 +3,33 @@ import logging
 from genome import Genome
 from genome import Alignment
 from config import Config
-from utils import *
+from utils import get_today_datetime, generate_filename, zip_directory
 from typing import List
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
-
+import os
 
 
 def filter_subsequences_with_maximum_hits(
-    alignments: List[Alignment], 
-    outgroup_size: int, 
-    max_percentage_genomes=None):
+        alignments: List[Alignment],
+        outgroup_size: int,
+        max_percentage_genomes=None):
     """
     Removes subsequences that have hits with more than max_percentage_genomes% in the outgroup. It alters the subsequences in alighments.
-    
+
     Keyword arguments:
         alignments (List[Alignment]): A list of alignments.
         outgroup_size (int): The size of the outgroup.
         max_percentage_genomes (float, optional): The maximum percentage of genomes allowed to have hits. Should be between 0 and 100. Defaults to None. 
-    
+
     Returns:
         None
     """
-    
 
     if max_percentage_genomes == None:
         return
-    
+
     if max_percentage_genomes < 0 or max_percentage_genomes > 100:
         raise ValueError("max_percentage_genomes should be between 0 and 100")
 
@@ -51,30 +50,28 @@ def filter_subsequences_with_maximum_hits(
         alignment.subsequences = subsequences_to_keep
 
 
-
-
 def create_multifasta_file_for_list(
-    alignments: List[Alignment], 
-    config_args: Config) -> str:
+        alignments: List[Alignment],
+        config_args: Config) -> str:
     """
     Creates a fasta file with multiple sequences
-    
+
     Keyword arguments:
         alignments (List[Alignment]): A list of Alignment objects.
         config_args (Config): A Config object containing configuration arguments.
-    
+
     Returns:
         str: The file path of the created multifasta file.
     """
-    
+
     list = []
     fasta_file_path = ""
 
     filter_subsequences_with_maximum_hits(
-        alignments=alignments, 
+        alignments=alignments,
         outgroup_size=config_args.outgroup_size,
         max_percentage_genomes=config_args.outgroup_filter_percentage
-        )
+    )
 
     for id, alignment in alignments.items():
         for sequence in alignment.subsequences:
@@ -93,15 +90,15 @@ def create_multifasta_file_for_list(
 
 
 def general_header(
-    config_args: Config, 
-    total_time: float):
+        config_args: Config,
+        total_time: float):
     """
     Generate a header DataFrame for the report.
-    
+
     Keyword arguments:
         config_args (Config): The configuration arguments.
         total_time (float): The processing time in minutes.
-    
+
     Returns:
         pandas.DataFrame: The header DataFrame with the following columns:
             - Ingroup count
@@ -145,18 +142,17 @@ def general_header(
 def stats_page(config_args: Config):
     """
     Generate a DataFrame containing statistics for the alignment report.
-    
+
     Keyword arguments:
         config_args (Config): The configuration arguments.
-    
+
     Returns:
         pd.DataFrame: The DataFrame containing the statistics.
-    
+
     Example:
         >>> config = Config()
         >>> stats_page(config)
     """
-    
 
     header_dict = {}
     header_dict["Total Alignments Found by Parsnp: "] = config_args.stats.alignments_found_by_parsnp
@@ -182,8 +178,6 @@ def stats_page(config_args: Config):
         round(config_args.stats.percentage_alignment_kept*100))+"%"
 
     header_dict["Total Subsequences From Alignments: "] = config_args.stats.total_subsequences_from_alignments
-    # header_dict["Total Candidates: "] = config_args.stats.total_candidates
-    # header_dict["Candidates Percentage: "] = config_args.stats.percentage_candidates
 
     header_dict["Parsnp runtime: "] = config_args.stats.parsnp_runtime
     header_dict["Filtering runtime: "] = config_args.stats.filtering_runtime
@@ -200,10 +194,10 @@ def stats_page(config_args: Config):
 def candidates_main(pathogen_candidates: List[Alignment]):
     """
     Process the pathogen candidates and generate a DataFrame with relevant information.
-    
+
     Keyword arguments:
         pathogen_candidates (List[Alignment]): A list of Alignment objects representing the pathogen candidates.
-    
+
     Returns:
         pd.DataFrame: A DataFrame containing the following information for each pathogen candidate:
             - Subsequence: The value of the subsequence.
@@ -216,7 +210,7 @@ def candidates_main(pathogen_candidates: List[Alignment]):
             - Genome Filename: The filename of the genome.
             - Genome Description: The header of the genome.
             - Genome Length: The length of the genome.
-    
+
     Raises:
         None
     """
@@ -226,17 +220,13 @@ def candidates_main(pathogen_candidates: List[Alignment]):
     for id, genome in pathogen_candidates.items():
         for subsequence in genome.subsequences:
             d = {}
-            # d["Subsequence Id"]=subsequence.id
             d["Subsequence"] = subsequence.value
             d["Outgroup Hits"] = len(subsequence.outgroup_hits)
             d["Subsequence position in Genome"] = subsequence.position_in_genome
-            # d["Outgroup Score"] = "TBC"
             d["Percentage of Identity"] = genome.percentage_of_identity
             d["Alignment Info"] = genome.description
             d["Alignment Strand"] = genome.strand
-            # d["Alignment Position in Genome"] = genome.position_in_genome
             d["Alignment Length"] = genome.length
-            # d["Subsequence Position"] = subsequence.position
             d["Genome Filename"] = genome.genome_filename
             d["Genome Description"] = genome.genome_header
             d["Genome Length"] = genome.genome_length
@@ -252,13 +242,10 @@ def candidates_main(pathogen_candidates: List[Alignment]):
     try:
         main_fr_t_s = main_fr_t.sort_values(
             ['Outgroup Hits', 'Percentage of Identity'], ascending=[True, False])
-        # main_fr_t_s = main_fr_t.sort_values(['Outgroup Hits'], ascending=[True])
     except Exception as e:
         logging.info(e)
-        # print(e)
 
     return main_fr_t_s
-
 
 
 def create_general_report(config_args: Config,
@@ -266,15 +253,15 @@ def create_general_report(config_args: Config,
                           mins: float):
     """
     Creates a general report.
-    
+
     Keyword arguments:
         config_args (Config): The configuration arguments.
         pathogen_candidates (List[Genome]): The list of pathogen candidates.
         mins (float): The total time in minutes.
-    
+
     Returns:
         str: The filepath of the generated report.
-    
+
     Raises:
         None
     """
@@ -287,10 +274,11 @@ def create_general_report(config_args: Config,
     # General information
     # Create header dataframe
     header_fr = general_header(config_args=config_args, total_time=mins)
-    header_fr.to_excel(writer, sheet_name="Pathogens Candidates", index=True)
+    header_fr.to_excel(
+        writer, sheet_name="Unique Sequence Candidates", index=True)
 
     # All candidates in one sheet
-    sheet_name = "Pathogens Candidates"
+    sheet_name = "Unique Sequence Candidates"
     main_fr = candidates_main(pathogen_candidates=pathogen_candidates)
     if not main_fr.empty:
         main_fr.to_excel(writer, startrow=18,
@@ -311,6 +299,8 @@ def create_general_report(config_args: Config,
 
     create_multifasta_file_for_list(
         alignments=pathogen_candidates, config_args=config_args)
-    # zip_directory(output_dir=results_dir_name, zip_dir=results_dir_name)
+
+    zip_directory(output_dir=config_args.results_path,
+                  zip_dir=config_args.results_path)
 
     return filename_path

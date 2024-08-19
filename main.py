@@ -16,10 +16,10 @@ from report import create_general_report
 def config_logging(log_dir: str):
     """
     Configures logging settings and sets up log file.
-    
+
     Keyword arguments:
         log_dir (str): The directory path where the log file will be saved.
-    
+
     Returns:
         None
     """
@@ -39,7 +39,7 @@ def setup_run():
     """
     This routine setup the config file based on the input parameters
     and the log file.'''
-    
+
     Returns:
         Config: The configuration object containing the setup parameters.
     """
@@ -75,7 +75,7 @@ def setup_run():
 def main():
     """
     Main function that executes the alignment process.
-    
+
     Returns:
         None
     """
@@ -101,7 +101,7 @@ def main():
         success = run_filter(config_args=config_args)
 
     if success:
-        alignment_genomes = pathogens.get_pathogens_from_alignments(
+        alignment_genomes = pathogens.get_unique_seq_from_alignments(
             config_args=config_args
         )
         end = time.time()
@@ -112,7 +112,6 @@ def main():
             config_args=config_args, pathogen_candidates=alignment_genomes, mins=mins
         )
 
-    # Delete at some point the temp directory where the ingroup was copied (if one was created)
     if config_args.copied_ingroup_folder:
         delete_files(config_args.ingroup_path)
         os.rmdir(config_args.ingroup_path)
@@ -121,7 +120,8 @@ def main():
         delete_files(config_args.outgroup_path)
         os.rmdir(config_args.outgroup_path)
 
-    logging.info("Deleting temporal files -------------------------------------\n")
+    logging.info(
+        "Deleting temporal files -------------------------------------\n")
     delete_files(config_args.multifasta_path)
     delete_files(config_args.in_process_path)
 

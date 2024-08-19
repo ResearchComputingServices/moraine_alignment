@@ -90,7 +90,6 @@ def get_today_datetime():
     """
 
     now = datetime.now()
-    # dt_string = now.strftime("%Y_%m_%d")
     dt_string = now.strftime("%Y_%m_%d_%H_%M")
     return dt_string
 
@@ -133,7 +132,6 @@ def get_filename(file_path):
 
     try:
         full_name = os.path.basename(file_path)
-        # file_name = os.path.splitext(full_name)
     except:
         full_name = file_path
     return full_name
@@ -180,36 +178,6 @@ def get_files_in_dir(folder_path: str) -> list:
         logging.error("Directory does not exist.")
         logging.error(e)
 
-        # logging.info ("Directory does not exist.")
-        # logging.info(e)
-
-    return file_path_list
-
-
-def get_files_in_dir_recursive(folder_path: str) -> list:
-    """
-    Recursively retrieves all file paths within a given directory.
-
-    Keyword arguments:
-        folder_path (str): The path of the directory to search.
-
-    Returns:
-        list: A list of file paths found within the directory and its subdirectories.
-    """
-
-    try:
-        file_path_list = []
-        for f in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, f)
-            if os.path.isfile(file_path):
-                file_path_list.append(file_path)
-            else:
-                if os.path.isdir(file_path):
-                    file_path_list.extend(
-                        get_files_in_dir_recursive(file_path))
-    except Exception as e:
-        logging.error("Directory does not exist.")
-        logging.error(e)
     return file_path_list
 
 
@@ -322,10 +290,7 @@ def get_files_in_dir_recursive(folder_path: str) -> list:
                     recursive_list = get_files_in_dir_recursive(
                         folder_path=file_path)
                     file_path_list = file_path_list + recursive_list
-                    # file_path_list.extend(get_files_in_dir_recursive(folder_path=file_path))
     except Exception as e:
-        # logging.info ("Directory does not exist.")
-        # logging.info(e)
         logging.info("Directory does not exist.")
         logging.info(e)
 
@@ -351,8 +316,6 @@ def has_subfolders(folder_path: str) -> bool:
                 subfolders = True
                 break
     except Exception as e:
-        # logging.info ("Directory does not exist.")
-        # logging.info(e)
         logging.info("Directory does not exist.")
         logging.info(e)
 
@@ -388,7 +351,7 @@ def unzip_folder(zip_path: str, dest_path: str):
                 dest_path = dir_path
 
             shutil.unpack_archive(zip_path, dest_path, _format)
-            # zip_path = dir_path
+
         except Exception as e:
             logging.info("Error when unzip file")
             logging.info(e)
@@ -414,7 +377,7 @@ def remove_file_older_than(filepath, days):
     Raises:
         OSError: If there is an error while removing the file.
     """
-    
+
     old_days = -1
     if os.path.isfile(filepath):
         if days >= 0:
@@ -426,11 +389,9 @@ def remove_file_older_than(filepath, days):
             dif = current_datetime - file_created_datetime  # Dif in seconds between two days
             # 86400 = Number of secs in 1 day
             old_days = dif / 86400
-            # print(old_days)
             if old_days >= days:
                 try:
                     os.remove(filepath)
-                    # print ('File removed')
                 except OSError as e:
                     logging.error("Error: %s : %s" % (filepath, e.strerror))
     return old_days
@@ -466,7 +427,6 @@ def remove_folder_older_than(folder, days=None):
         dif = current_datetime - file_created_datetime  # Dif in seconds between two days
         # 86400 = Number of secs in 1 day
         old_days = dif / 86400
-        # print(old_days)
         if old_days >= days:
             try:
                 shutil.rmtree(folder)
@@ -497,7 +457,6 @@ def cleanup_folder(folder, days=None):
 
         for path in os.listdir(folder):
             if not path.startswith('.'):
-                # It is directory (folder)
                 fullpath = os.path.join(folder, path)
                 if os.path.isdir(fullpath):
                     remove_folder_older_than(folder=fullpath, days=days)

@@ -7,6 +7,7 @@ from utils import save_to_json, load_from_json
 import os
 import logging
 from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 import concurrent.futures
 import math
 
@@ -67,7 +68,8 @@ def save_alignments(
         bool: True if the alignments were successfully saved, False otherwise.
     """
 
-    alignment_filepath = os.path.join(config_args.results_path, alignment_filename)
+    alignment_filepath = os.path.join(
+        config_args.results_path, alignment_filename)
     success = save_to_json(dictio=alignments, filename=alignment_filepath)
     if success:
         config_args.filtered_xmfa_path = alignment_filepath
@@ -147,7 +149,6 @@ def compute_average_alignment_percentage_of_identity_sequential(alignment: Align
 
     sequences = []
     for s in alignment:
-        # If more information is needed, store the whole sequence object
         sequences.append(str(s.seq))
 
     n = len(sequences)
@@ -211,12 +212,12 @@ def compute_average_alignment_percentage_of_identity_parallel(
 
     sequences = []
     for s in alignment:
-        # If more information is needed, store the whole sequence object
         sequences.append(str(s.seq))
 
     n = len(sequences)
     total_pairs = math.comb(n, 2)
-    pairs_per_processor = math.floor(total_pairs / config_args.processors_number)
+    pairs_per_processor = math.floor(
+        total_pairs / config_args.processors_number)
 
     if pairs_per_processor < 1:
         pairs_per_processor = 1
@@ -288,7 +289,6 @@ def get_alignment_sequences(
     sequences = []
 
     for s in alignment:
-        # If more information is needed, store the whole sequence object
         sequences.append(str(s.seq))
 
     return sequences
@@ -371,8 +371,6 @@ def parse_metadata_xmfa(filename: str) -> dict:
             sequence_length = ""
 
             for line in file:
-                # print(line)
-                # print(sequence_index)
                 if line[0] == ">":
                     # We finished reading all the sequences info
                     # Fill the info of the last sequence
@@ -401,11 +399,14 @@ def parse_metadata_xmfa(filename: str) -> dict:
                         sequence_index = sequence_index + 1
 
                     if "##SequenceFile" in line:
-                        sequence_file = line[len("##SequenceFile") : len(line) - 1]
+                        sequence_file = line[len(
+                            "##SequenceFile"): len(line) - 1]
                     if "##SequenceHeader" in line:
-                        sequence_header = line[len("##SequenceHeader") : len(line) - 1]
+                        sequence_header = line[len(
+                            "##SequenceHeader"): len(line) - 1]
                     if "##SequenceLength" in line:
-                        sequence_length = line[len("##SequenceLength") : len(line) - 1]
+                        sequence_length = line[len(
+                            "##SequenceLength"): len(line) - 1]
         except Exception as e:
             print(e)
     else:
@@ -477,7 +478,8 @@ def filter_alignments_parallel(
     alignments_discarded_by_identity = 0
 
     for alignment in alignments:
-        logging.info("Filtering cluster  {} of {}".format(count, len(alignments)))
+        logging.info("Filtering cluster  {} of {}".format(
+            count, len(alignments)))
 
         alignment_length = compute_alignment_length(alignment=alignment)
 
@@ -502,7 +504,7 @@ def filter_alignments_parallel(
 
                     id = alignment[0].id
                     alignment_id = id.split()[0]
-                    alignment_number = alignment_id[7 : len(alignment_id)]
+                    alignment_number = alignment_id[7: len(alignment_id)]
                     d = {}
                     d["id"] = id
                     d["name"] = alignment[0].name
@@ -539,14 +541,14 @@ def filter_alignments_parallel(
 
         count = count + 1
 
-    # ---------------------------------------------------------
-    # This could be useful for a class
     logging.info("Total alignments: {}".format(len(alignments)))
     logging.info("Filtered Alignments: {}".format(len(filtered_alignments)))
     logging.info(
-        "Percentage kept: {}".format(len(filtered_alignments) / len(alignments) * 100)
+        "Percentage kept: {}".format(
+            len(filtered_alignments) / len(alignments) * 100)
     )
-    logging.info("Discarded by identity {}".format(alignments_discarded_by_identity))
+    logging.info("Discarded by identity {}".format(
+        alignments_discarded_by_identity))
 
     config_args.stats.set_alignments_discarded_by_length(
         count=alignments_discarded_by_length
@@ -564,10 +566,10 @@ def filter_alignments_parallel(
 def run_filter(config_args: Config) -> bool:
     """
     Runs the alignment filter process.
-    
+
     Keyword arguments:
         config_args (Config): The configuration arguments.
-    
+
     Returns:
         bool: True if the filter process is successful, False otherwise.
     """
@@ -613,11 +615,11 @@ def run_filter(config_args: Config) -> bool:
 def print_stats(filtered_alignments: dict, config):
     """
     Writes the lengths of sequences in the filtered alignments to a file.
-    
+
     Keyword arguments:
         filtered_alignments (dict): A dictionary containing filtered alignments.
         config: The configuration object.
-    
+
     Returns:
         None
     """
