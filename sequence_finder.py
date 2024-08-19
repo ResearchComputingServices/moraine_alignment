@@ -481,7 +481,7 @@ def get_alignment_subsequences(config_args: Config, alignment: dict) -> list:
 
 def get_unique_seq_from_alignments(config_args: Config):
     """
-    Retrieves pathogens from alignments based on the given configuration arguments.
+    Retrieves unique sequences from alignments based on the given configuration arguments.
 
     Keyword arguments:
         config_args (Config): The configuration arguments.

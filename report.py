@@ -191,15 +191,15 @@ def stats_page(config_args: Config):
     return header_fr_t
 
 
-def candidates_main(pathogen_candidates: List[Alignment]):
+def candidates_main(unique_seq_candidates: List[Alignment]):
     """
-    Process the pathogen candidates and generate a DataFrame with relevant information.
+    Process the sequence candidates and generate a DataFrame with relevant information.
 
     Keyword arguments:
-        pathogen_candidates (List[Alignment]): A list of Alignment objects representing the pathogen candidates.
+        unique_seq_candidates (List[Alignment]): A list of Alignment objects representing the unique_seq_candidates.
 
     Returns:
-        pd.DataFrame: A DataFrame containing the following information for each pathogen candidate:
+        pd.DataFrame: A DataFrame containing the following information for each unique_seq_candidate:
             - Subsequence: The value of the subsequence.
             - Outgroup Hits: The number of outgroup hits for the subsequence.
             - Subsequence position in Genome: The position of the subsequence in the genome.
@@ -217,7 +217,7 @@ def candidates_main(pathogen_candidates: List[Alignment]):
 
     main_dict = {}
     index = 0
-    for id, genome in pathogen_candidates.items():
+    for id, genome in unique_seq_candidates.items():
         for subsequence in genome.subsequences:
             d = {}
             d["Subsequence"] = subsequence.value
@@ -249,14 +249,14 @@ def candidates_main(pathogen_candidates: List[Alignment]):
 
 
 def create_general_report(config_args: Config,
-                          pathogen_candidates: List[Genome],
+                          unique_seq_candidates: List[Genome],
                           mins: float):
     """
     Creates a general report.
 
     Keyword arguments:
         config_args (Config): The configuration arguments.
-        pathogen_candidates (List[Genome]): The list of pathogen candidates.
+        unique_seq_candidates (List[Genome]): The list of unique_seq_candidates.
         mins (float): The total time in minutes.
 
     Returns:
@@ -279,7 +279,7 @@ def create_general_report(config_args: Config,
 
     # All candidates in one sheet
     sheet_name = "Unique Sequence Candidates"
-    main_fr = candidates_main(pathogen_candidates=pathogen_candidates)
+    main_fr = candidates_main(unique_seq_candidates=unique_seq_candidates)
     if not main_fr.empty:
         main_fr.to_excel(writer, startrow=18,
                          sheet_name=sheet_name, index=False, header=True)
@@ -298,7 +298,7 @@ def create_general_report(config_args: Config,
     writer.close()
 
     create_multifasta_file_for_list(
-        alignments=pathogen_candidates, config_args=config_args)
+        alignments=unique_seq_candidates, config_args=config_args)
 
     zip_directory(output_dir=config_args.results_path,
                   zip_dir=config_args.results_path)

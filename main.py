@@ -9,7 +9,7 @@ from utils import (
 )
 import logging
 import time
-import pathogens
+import sequence_finder
 from report import create_general_report
 
 
@@ -101,7 +101,7 @@ def main():
         success = run_filter(config_args=config_args)
 
     if success:
-        alignment_genomes = pathogens.get_unique_seq_from_alignments(
+        alignment_genomes = sequence_finder.get_unique_seq_from_alignments(
             config_args=config_args
         )
         end = time.time()
@@ -109,7 +109,7 @@ def main():
         config_args.stats.end_time = end
         config_args.stats.total_runtime = mins
         create_general_report(
-            config_args=config_args, pathogen_candidates=alignment_genomes, mins=mins
+            config_args=config_args, unique_seq_candidates=alignment_genomes, mins=mins
         )
 
     if config_args.copied_ingroup_folder:
