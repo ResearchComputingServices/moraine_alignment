@@ -27,8 +27,6 @@ Make sure the genomes being tested are in the correct folders, then run the main
 python main.py ...
 ```
 
-A detailed manual on how to use this software can be found in [here](#doc/manual.docx)
-
 <details>
 <summary><h2 style="display:inline-block">Running this code on a virtual machine (VM)?</h2></summary>
 
