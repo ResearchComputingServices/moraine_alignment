@@ -341,9 +341,6 @@ def verify_outgroup_folder(config_args: Config):
     return proceed
 
 
-"""For stress testing only"""
-
-
 def read_genomes_duplicate(config_args: Config, larger_size=int, type=None):
     """
     Reads genomes from a folder and duplicates them to reach a larger size.
@@ -495,7 +492,6 @@ def get_unique_seq_from_alignments(config_args: Config):
     logging.info(
         "Reding Outgroup ------------------------------------------------ \n")
     outgroup_genomes = read_genomes(config_args=config_args, type="Outgroup")
-    # outgroup_genomes = read_genomes_duplicate(config_args=config_args, larger_size=500, type="Outgroup")
 
     if len(outgroup_genomes) == 0:
         return success

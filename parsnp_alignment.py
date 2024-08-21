@@ -13,7 +13,6 @@ import shlex
 import subprocess
 import logging
 import time
-from stats import Stats
 
 
 def parsnp_wrapper(
@@ -40,7 +39,7 @@ def parsnp_wrapper(
     try:
         # -c forces all the genomes in the input_directory to be included in the alignment
         command = (
-            "parsnp  -p"
+            "parsnp  -p "
             + str(number_threads)
             + " -r "
             + reference_genome_with_path
@@ -81,7 +80,7 @@ def verify_ingroup_folder(config_args: Config):
         return proceed
 
     # The ingroup size was not specified, set it to the count of files in the directory
-    if config_args.ingroup_size == None:
+    if config_args.ingroup_size is None:
         config_args.ingroup_size = len(genome_filepaths)
 
     # We will copy the files to a different location if the ingroup location has directories
@@ -142,7 +141,7 @@ def run_parsnp(config_args: Config, reference_genome: str = None):
     proceed = verify_ingroup_folder(config_args=config_args)
 
     if proceed:
-        if reference_genome == None or (not os.path.isfile(reference_genome)):
+        if reference_genome is None or (not os.path.isfile(reference_genome)):
             reference_genome = "!"  # Choose randomly a reference genome
 
     dir_name = get_today_datetime()

@@ -3,7 +3,7 @@ from Bio import AlignIO
 from Bio.Align import Alignment
 import time
 from config import Config
-from utils import save_to_json, load_from_json
+from utils import save_to_json
 import os
 import logging
 from Bio import SeqIO
