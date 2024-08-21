@@ -98,7 +98,7 @@ def create_multifasta_file(
     index = start
     fasta_file_path = ""
 
-    for sequence in genome.subsequences[start : end + 1]:
+    for sequence in genome.subsequences[start: end + 1]:
         str_id = "alignment_{} subseqindex_{} subseqid_{}".format(
             genome.id, index, sequence.id
         )
@@ -109,7 +109,8 @@ def create_multifasta_file(
     # Write the records to a FASTA file
     if len(list) > 0:
         try:
-            fasta_file = "Alignment_{}_S_{}_to_{}.fasta".format(genome.id, start, end)
+            fasta_file = "Alignment_{}_S_{}_to_{}.fasta".format(
+                genome.id, start, end)
             fasta_file_path = os.path.join(file_location, fasta_file)
             os.makedirs(file_location, exist_ok=True)
             SeqIO.write(list, fasta_file_path, "fasta")
@@ -172,7 +173,7 @@ def write_subsequences_to_files(
                 genome.id, len(genome.subsequences)
             )
         )
-        # print ("Genome {} -> # Sequences to write: {}".format(genome.filename, len(genome.subsequences)))
+
         number_subsequences_per_processor = math.floor(
             len(genome.subsequences) / number_processors
         )
@@ -184,8 +185,8 @@ def write_subsequences_to_files(
             number_processors = 1
             number_subsequences_per_processor = len(genome.subsequences)
 
-        logging.info("Creating multifasta files for genome {}...".format(genome.id))
-        # print("Creating multifasta files for genome {}...".format(genome.filename))
+        logging.info(
+            "Creating multifasta files for genome {}...".format(genome.id))
         processor_work = {}
         ini = 0
         end = number_subsequences_per_processor - 1
@@ -195,16 +196,15 @@ def write_subsequences_to_files(
             end = ini + number_subsequences_per_processor - 1
 
         # Adjust the last processor's work for the number of sequences
-        processor_work[number_processors - 1]["end"] = len(genome.subsequences) - 1
-
-        # print ("CPU WORK")
-        # pprint.pprint(processor_work)
+        processor_work[number_processors -
+                       1]["end"] = len(genome.subsequences) - 1
 
         file_list = []
         for i in range(0, number_processors):
             start = processor_work[i]["ini"]
             end = processor_work[i]["end"]
-            file_name = create_multifasta_file(genome, start, end, file_location)
+            file_name = create_multifasta_file(
+                genome, start, end, file_location)
             if len(file_name) > 0:
                 file_list.append(file_name)
 
@@ -242,9 +242,6 @@ def write_subsequences_to_files_fixed_files(
             len(genome.subsequences) / number_subsequences_per_processor
         )
 
-        # print ("Genome {} -> # Sequences to write: {}".format(genome.filename, len(genome.subsequences)))
-        # number_subsequences_per_processor = math.floor(len(genome.subsequences) / number_processors)
-
         if number_subsequences_per_processor <= 0 or number_processors == 0:
             # There are very few sequences.
             # Less than number of processors
@@ -252,8 +249,8 @@ def write_subsequences_to_files_fixed_files(
             number_processors = 1
             number_subsequences_per_processor = len(genome.subsequences)
 
-        logging.info("Creating multifasta files for genome {}...".format(genome.id))
-        # print("Creating multifasta files for genome {}...".format(genome.filename))
+        logging.info(
+            "Creating multifasta files for genome {}...".format(genome.id))
         processor_work = {}
         ini = 0
         end = number_subsequences_per_processor - 1
@@ -263,16 +260,15 @@ def write_subsequences_to_files_fixed_files(
             end = ini + number_subsequences_per_processor - 1
 
         # Adjust the last processor's work for the number of sequences
-        processor_work[number_processors - 1]["end"] = len(genome.subsequences) - 1
-
-        # print ("CPU WORK")
-        # pprint.pprint(processor_work)
+        processor_work[number_processors -
+                       1]["end"] = len(genome.subsequences) - 1
 
         file_list = []
         for i in range(0, number_processors):
             start = processor_work[i]["ini"]
             end = processor_work[i]["end"]
-            file_name = create_multifasta_file(genome, start, end, file_location)
+            file_name = create_multifasta_file(
+                genome, start, end, file_location)
             if len(file_name) > 0:
                 file_list.append(file_name)
 
@@ -296,7 +292,8 @@ def verify_outgroup_folder(config_args: Config):
 
     proceed = False
 
-    genome_filepaths = get_files_in_dir_recursive(folder_path=config_args.outgroup_path)
+    genome_filepaths = get_files_in_dir_recursive(
+        folder_path=config_args.outgroup_path)
 
     # There aren't files to process
     if len(genome_filepaths) <= 0:
@@ -322,7 +319,8 @@ def verify_outgroup_folder(config_args: Config):
         if os.path.isdir(new_outgroup_path):
 
             logging.info(
-                "Copying files into temporal directory: {}".format(new_outgroup_path)
+                "Copying files into temporal directory: {}".format(
+                    new_outgroup_path)
             )
             # Copy files to temporary directory
             count = 0
@@ -341,9 +339,6 @@ def verify_outgroup_folder(config_args: Config):
 
     proceed = True
     return proceed
-
-
-"""For stress testing only"""
 
 
 def read_genomes_duplicate(config_args: Config, larger_size=int, type=None):
@@ -372,7 +367,8 @@ def read_genomes_duplicate(config_args: Config, larger_size=int, type=None):
     if not proceed:
         return genomes
 
-    genome_filepaths = get_files_in_dir_recursive(folder_path=config_args.outgroup_path)
+    genome_filepaths = get_files_in_dir_recursive(
+        folder_path=config_args.outgroup_path)
     repeated_times = round(larger_size / len(genome_filepaths))
 
     for i in range(0, repeated_times):
@@ -411,10 +407,12 @@ def read_genomes(config_args: Config, type=None):
     if not proceed:
         return genomes
 
-    genome_filepaths = get_files_in_dir_recursive(folder_path=config_args.outgroup_path)
+    genome_filepaths = get_files_in_dir_recursive(
+        folder_path=config_args.outgroup_path)
     for file_path in genome_filepaths:
         try:
-            genome = Genome(filename=file_path, format=config_args.format, type=type)
+            genome = Genome(filename=file_path,
+                            format=config_args.format, type=type)
             if genome != None:
                 genomes[genome.id] = genome
         except Exception as e:
@@ -469,7 +467,6 @@ def get_alignment_subsequences(config_args: Config, alignment: dict) -> list:
         alignment.subsequences.append(subsequence)
         alignment.original_subsequences_count = len(alignment.subsequences)
 
-    # subsequence_files = write_subsequences_to_files(genomes=[alignment], file_location=config_args.in_process_path, number_processors=config_args.processors_number)
     subsequence_files = write_subsequences_to_files_fixed_files(
         genomes=[alignment],
         file_location=config_args.in_process_path,
@@ -479,9 +476,9 @@ def get_alignment_subsequences(config_args: Config, alignment: dict) -> list:
     return alignment, subsequence_files
 
 
-def get_pathogens_from_alignments(config_args: Config):
+def get_unique_seq_from_alignments(config_args: Config):
     """
-    Retrieves pathogens from alignments based on the given configuration arguments.
+    Retrieves unique sequences from alignments based on the given configuration arguments.
 
     Keyword arguments:
         config_args (Config): The configuration arguments.
@@ -492,9 +489,9 @@ def get_pathogens_from_alignments(config_args: Config):
     success = False
 
     # Read outgroup files and create a genome object
-    logging.info("Reding Outgroup ------------------------------------------------ \n")
+    logging.info(
+        "Reding Outgroup ------------------------------------------------ \n")
     outgroup_genomes = read_genomes(config_args=config_args, type="Outgroup")
-    # outgroup_genomes = read_genomes_duplicate(config_args=config_args, larger_size=500, type="Outgroup")
 
     if len(outgroup_genomes) == 0:
         return success
@@ -505,8 +502,6 @@ def get_pathogens_from_alignments(config_args: Config):
     )
     if len(outgroup_sequence_files) == 0:
         return success
-
-    # pprint.pprint(outgroup)
 
     logging.info("\n")
 
@@ -543,7 +538,6 @@ def get_pathogens_from_alignments(config_args: Config):
 
                 # Blast the alignment subsequences (or sequence) against the outgroup
                 if len(subsequence_files) > 0:
-                    # logging.info("{} multifasta files to blast against {} outgroup".format(len(subsequence_files),len(outgroup_genomes)))
                     blast_subsequences_against_genomes(
                         genomes_query=[alignment_object],
                         genomes_subject=outgroup_genomes,
@@ -551,10 +545,6 @@ def get_pathogens_from_alignments(config_args: Config):
                         subject_sequence_fasta_paths=outgroup_sequence_files,
                         config_args=config_args,
                     )
-
-                # Filter subsequences
-                # filter_subsequences_with_maximum_hits(genomes=[alignment_genome], outgroup_size=len(outgroup_genomes), max_percentage_genomes=config_args.outgroup_filter_percentage)
-                # Replace for file saving to avoid memory explosion again.
 
                 alignment_genomes[alignment_object.id] = alignment_object
                 count = count + 1

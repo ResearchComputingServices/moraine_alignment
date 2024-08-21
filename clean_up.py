@@ -7,10 +7,10 @@ from config import Config
 def remove_file(filename):
     """
     Removes the specified file if it exists.
-    
+
     Keyword arguments:
         filename (str): The path of the file to be removed.
-    
+
     Returns:
         None
     """
@@ -44,14 +44,13 @@ def remove_file_older_than(filepath, days):
             current_datetime = datetime.timestamp(datetime.now())
             dif = (
                 current_datetime - file_created_datetime
-            )  # Dif in seconds between two days
+            )
+            # Dif in seconds between two days
             # 86400 = Number of secs in 1 day
             old_days = dif / 86400
-            # print(old_days)
             if old_days >= days:
                 try:
                     os.remove(filepath)
-                    # print ('File removed')
                 except OSError as e:
                     print("Error: %s : %s" % (filepath, e.strerror))
         else:
@@ -61,11 +60,11 @@ def remove_file_older_than(filepath, days):
 def clean_history(folder, days=None):
     """
     Clean up the history of a folder by removing files and subfolders older than a specified number of days.
-    
+
     Keyword arguments:
         folder (str): The path to the folder to be cleaned up.
         days (int, optional): The number of days. If not provided, defaults to 0.
-    
+
     Raises:
         OSError: If there is an error accessing or removing files or subfolders.
     """
@@ -88,10 +87,8 @@ def clean_history(folder, days=None):
                         remove_file_older_than(filepath, days)
                     # Remove subfolder -if empty
                     try:
-                        # print (fullpath)
                         if not os.listdir(fullpath):
                             os.rmdir(fullpath)
-                            # print ('Subfolder Removed')
                     except OSError as e:
                         print("Error: %s : %s" % (fullpath, e.strerror))
 
@@ -119,7 +116,8 @@ if __name__ == "__main__":
                 config_args.cleanup_days, config_args.output_folder
             )
         )
-        clean_history(folder=config_args.output_folder, days=config_args.cleanup_days)
+        clean_history(folder=config_args.output_folder,
+                      days=config_args.cleanup_days)
 
         print(
             "Removing {0} days old files from {1}".format(
@@ -129,10 +127,6 @@ if __name__ == "__main__":
         clean_history(
             folder=config_args.output_parsnp_folder, days=config_args.cleanup_days
         )
-
-        # Remove log files
-        # print('Removing {0} days old files from {1}'.format(logs_days, logs_folder))
-        # Remove log files
 
         current_datetime = datetime.now()
         dt_string = current_datetime.strftime("%d/%m/%Y %H:%M:%S")

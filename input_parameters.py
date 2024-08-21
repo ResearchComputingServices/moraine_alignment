@@ -10,13 +10,16 @@ OUTPUT_PARSNP_FOLDER = "Output_parsnp/"
 INGROUP_FOLDER = "Ingroup_Demo"
 OUTGROUP_FOLDER = "Outgroup_Demo"
 
-INGROUP_SIZE = None         #Leave None to use all genomes in the ingroup folder or specify the number of genomes to use
-OUTGROUP_SIZE = None        #Leave None to use all genomes in the outgroup  folder or specify the number of genomes to use
+# Leave None to use all genomes in the ingroup folder or specify the number of genomes to use
+INGROUP_SIZE = None
+# Leave None to use all genomes in the outgroup  folder or specify the number of genomes to use
+OUTGROUP_SIZE = None
 
 # Filtering parameters for the parsnp alignment
-MINIMUM_ALIGNMENT_LENGTH = 300                   #Minimum sequence length in an alignment
-MINIMUM_ALIGNMENT_COVERAGE = 99                  #Minimum percentage of genomes that there should be an alignment values from [0,100]
-MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 99  
+MINIMUM_ALIGNMENT_LENGTH = 300  # Minimum sequence length in an alignment
+# Minimum percentage of genomes that there should be an alignment values from [0,100]
+MINIMUM_ALIGNMENT_COVERAGE = 99
+MINIMUM_ALIGNMENT_PERCENTAGE_IDENTITY = 99
 
 # Add the location of the parsnp file to avoid re-run parsnp
 PARSNP_XMFA_FILE_LOCATION = ""

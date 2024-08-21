@@ -1,4 +1,3 @@
-import shlex, subprocess
 import os
 import time
 from Bio.Blast.Applications import NcbiblastnCommandline
@@ -13,208 +12,6 @@ from Bio.Seq import Seq
 from Bio import SeqIO
 from Bio.Blast import NCBIXML
 import io
-
-
-def ncbi_blast_bio(
-    query_file: str,
-    subject_file: str,
-    e_cutoff: float,
-    identity_perc_cutoff: float,
-    max_hsps=None,
-):
-    """
-    Calls ncbi_blast using biopython wrapper'.
-
-    Keyword arguments:
-        query_file (str): Path to the query file.
-        subject_file (str): Path to the subject file.
-        e_cutoff (float): E-value cutoff for the BLAST search.
-        identity_perc_cutoff (float): Identity percentage cutoff for the BLAST search.
-        max_hsps (int, optional): Maximum number of HSPs (High-scoring Segment Pairs) to report. Defaults to None.
-
-    Returns:
-        results: The results of the BLAST search.
-
-    Raises:
-        FileNotFoundError: If the query file or subject file does not exist.
-        Exception: If there is an error accessing the file or executing the BLAST search.
-    """
-    results = None
-
-    delete_file = False
-    try:
-        if not os.path.isfile(subject_file) or not os.path.isfile(query_file):
-            print("File %s does not exists OR", subject_file)
-            print("File %s does not exists ", query_file)
-            return results
-    except Exception as exc:
-        print("Error accessing file %s", subject_file)
-        print(exc)
-
-    # Execute blast
-    try:
-        if max_hsps == None:
-            output = NcbiblastnCommandline(
-                query=query_file,
-                subject=subject_file,
-                evalue=e_cutoff,
-                perc_identity=identity_perc_cutoff,
-                outfmt=5,
-                task="blastn-short",
-            )()[0]
-        else:
-            output = NcbiblastnCommandline(
-                query=query_file,
-                subject=subject_file,
-                evalue=e_cutoff,
-                perc_identity=identity_perc_cutoff,
-                max_hsps=max_hsps,
-                outfmt=5,
-                task="blastn-short",
-            )()[0]
-
-        # Uncomment to try any of these alternatives to call when Ncbiblast is not longer available
-        # output2 = blastn_wrapper_cl(query_file, subject_file,  e_cutoff, identity_perc_cutoff, max_hsps)
-        # output3 = blastn_wrapper_sub(query_file, subject_file,  e_cutoff, identity_perc_cutoff, max_hsps)
-
-        # results = __parse_blast_xml_output(output, subject_id)
-
-        # Uncomment these to parse the results obtained by the alternatives wrappers
-        # results2 = __parse_blast_xml_output(output2, subject_id)
-        # results3 = __parse_blast_xml_output(output3, subject_id)
-
-    except Exception as exc:
-        print("Error when executing blast")
-        print(exc)
-
-    # Delete subject file if created
-    try:
-        if delete_file and os.path.isfile(subject_file):
-            os.remove(subject_file)
-    except Exception as exc:
-        print("Could not delete file %s", subject_file)
-
-    return results
-
-
-def ncbi_blast_wrapper_cl(
-    query_file: str,
-    subject_file: str,
-    e_cutoff: float,
-    identity_perc_cutoff: float,
-    max_hsps: int,
-):
-    """
-    Alternative Blast wrapper using os.popen
-
-    Keyword arguments:
-        query_file (str): Path to the query file.
-        subject_file (str): Path to the subject file.
-        e_cutoff (float): E-value cutoff for the BLAST search.
-        identity_perc_cutoff (float): Identity percentage cutoff for the BLAST search.
-        max_hsps (int): Maximum number of HSPs (High-scoring Segment Pairs) to report.
-
-    Returns:
-        str: Output of the BLAST search.
-
-    Raises:
-        Exception: If an error occurs during the BLAST search.
-    """
-
-    try:
-        if max_hsps == None:
-            command = (
-                "blastn -outfmt 5 -query "
-                + query_file
-                + " -evalue "
-                + str(e_cutoff)
-                + " -subject "
-                + subject_file
-                + " -task=blastn-short "
-                + " -perc_identity "
-                + str(identity_perc_cutoff)
-            )
-        else:
-            command = (
-                "blastn -outfmt 5 -query "
-                + query_file
-                + " -evalue "
-                + str(e_cutoff)
-                + " -subject "
-                + subject_file
-                + " -task=blastn-short "
-                + " -perc_identity "
-                + str(identity_perc_cutoff)
-                + " -max_hsps "
-                + str(max_hsps)
-            )
-
-        output = os.popen(command).read()
-    except Exception as e:
-        # logging.error(e)
-        print(e)
-    return output
-
-
-def ncbi_blast_wrapper_sub(
-    query_file: str,
-    subject_file: str,
-    e_cutoff: float,
-    identity_perc_cutoff: float,
-    max_hsps: int,
-):
-    """
-    Alternative Blast wrapper using subprocess: to be used when biopython wrapper is removed
-
-    Keyword arguments:
-        query_file (str): Path to the query file.
-        subject_file (str): Path to the subject file.
-        e_cutoff (float): E-value cutoff for the BLAST search.
-        identity_perc_cutoff (float): Identity percentage cutoff for the BLAST search.
-        max_hsps (int): Maximum number of HSPs (High-scoring Segment Pairs) to report.
-
-    Returns:
-        str: The output of the BLAST search.
-
-    Raises:
-        Exception: If an error occurs during the BLAST search.
-    """
-
-    try:
-        if max_hsps == None:
-            command = (
-                "blastn -outfmt 5 -query "
-                + query_file
-                + " -evalue "
-                + str(e_cutoff)
-                + " -subject "
-                + subject_file
-                + " -task=blastn-short "
-                + " -perc_identity "
-                + str(identity_perc_cutoff)
-            )
-        else:
-            command = (
-                "blastn -outfmt 5 -query "
-                + query_file
-                + " -evalue "
-                + str(e_cutoff)
-                + " -subject "
-                + subject_file
-                + " -task=blastn-short "
-                + " -perc_identity "
-                + str(identity_perc_cutoff)
-                + " -max_hsps "
-                + str(max_hsps)
-            )
-
-        args = shlex.split(command)
-        result = subprocess.run(args, capture_output=True, text=True)
-        output = result.stdout.strip()
-    except Exception as e:
-        # logging.error(e)
-        print(e)
-    return output
 
 
 def __parse_blast_xml_output(output: str, subject_id: str) -> dict:
@@ -284,7 +81,7 @@ def ncbi_blast_multifasta(
     subject_id: str,
     e_cutoff: float,
     identity_perc_cutoff: float,
-    max_hsps=None,
+    max_hsps: int | None,
     config_args: Config = None,
 ):
     """
@@ -318,8 +115,10 @@ def ncbi_blast_multifasta(
             # Create subject fasta file
             subject_file_name = str(uuid.uuid4()) + ".fasta"
             os.makedirs(config_args.TEMP_PATH, exist_ok=True)
-            subject_file = os.path.join(config_args.TEMP_PATH, subject_file_name)
-            subject_sequence_record = SeqRecord(Seq(subject_sequence), id="subject")
+            subject_file = os.path.join(
+                config_args.TEMP_PATH, subject_file_name)
+            subject_sequence_record = SeqRecord(
+                Seq(subject_sequence), id="subject")
             SeqIO.write(subject_sequence_record, subject_file, "fasta")
             delete_file = True
         else:
@@ -334,7 +133,7 @@ def ncbi_blast_multifasta(
         return results
 
     # Execute blast
-    if max_hsps == None:
+    if max_hsps is None:
         output = NcbiblastnCommandline(
             query=query_file,
             subject=subject_file,
@@ -384,9 +183,9 @@ def map_blast_results_to_genome(genome: Genome, blast_results: dict):
     Raises:
         None
     """
-    if blast_results != None:
+    if blast_results is not None:
         for subseq_id, result in blast_results.items():
-            if result["hits"] != None and len(result["hits"]) > 0:
+            if result["hits"] is not None and len(result["hits"]) > 0:
                 try:
                     index = int(result["subseq_index"])
                     genome_subject_id = result["hits"]["hit_genome_id"]
@@ -420,7 +219,6 @@ def blast_multifasta_files_vs_subject(
     subject_genome_id = subject_info["subject_genome_id"]
 
     query_blast_results = []
-    # print(subject_info)
     for fp in query_fasta_paths:
         blast_result = ncbi_blast_multifasta(
             query_file=fp,
@@ -464,14 +262,6 @@ def blast_query_subsequences_vs_outgroup(
     subject_index = 0
     processors_tasks = []
     total_subjects = len(genomes_subject)
-    # calls = 1
-
-    # This is just for TESTING that we are doing all the outgroups
-    # ------------------------------------------------------------
-    # all_outgroup_ids = []
-    # for subject_genome_id in genomes_subject:
-    #    all_outgroup_ids.append(subject_genome_id)
-    # ------------------------------------------------------------
 
     for subject_genome_id, subject_genome in genomes_subject.items():
         if (
@@ -487,20 +277,11 @@ def blast_query_subsequences_vs_outgroup(
             processor_index = processor_index + 1
             subject_index = subject_index + 1
 
-            # For testing --------------------------------------------------
-            # if subject_genome_id in all_outgroup_ids:
-            #    all_outgroup_ids.remove(subject_genome_id)
-            # else:
-            #    logging.error("We are looking for an unexistent id. ")
-
-            # --------------------------------------------------------------
-
             if (
                 processor_index >= config_args.processors_number
                 or subject_index >= total_subjects
             ):
 
-                # logging.info("Call {}".format(calls))
                 future_results = [
                     executor.submit(
                         blast_multifasta_files_vs_subject,
@@ -516,30 +297,16 @@ def blast_query_subsequences_vs_outgroup(
                 ):
                     try:
                         processors_results.append(finished.result())
-                        # logging.info(finished.result())
                     except concurrent.futures._base.TimeoutError:
                         logging.error("Process took to long to complete")
-                        # print("Process took to long to compete")
                     except Exception as exc:
                         logging.error("Exception occurred")
                         logging.error(exc)
-                        # print ("Exception occurred: ")
-                        # print (exc)
 
                 processors_tasks = []
                 processor_index = 0
-                # calls = calls + 1
-
-    # For testing --------------------------------------------------
-    # if len(all_outgroup_ids)==0:
-    #    logging.info("Test passed. We run all the outgroup")
-    # else:
-    #    logging.error("We are missing to run some outgroup")
-    # --------------------------------------------------------------
 
     return processors_results
-
-    # Map all results back to the classes
 
 
 def blast_subsequences_against_genomes(
@@ -572,9 +339,7 @@ def blast_subsequences_against_genomes(
     )
     for query_index in range(0, len(genomes_query)):
 
-        # print ("Genome {}".format(query_index))
         query_genome_id = genomes_query[query_index].id
-        query_genome_description = genomes_query[query_index].description
 
         # Get the file with the subsequences filepaths corresponding to blast
         if query_genome_id not in query_subseq_fasta_paths:
@@ -593,35 +358,9 @@ def blast_subsequences_against_genomes(
                 map_blast_results_to_genome(
                     genome=genomes_query[query_index], blast_results=blast_result
                 )
-            # save_blast_result(blast_results=blast_results)
 
-    # logging.info("total json files: {}.".format(total_json_files))
     end = time.time()
     mins = (end - start) / 60
     config_args.stats.blast_runtime = config_args.stats.blast_runtime + mins
 
     logging.info("Blast mins {}".format(mins))
-
-
-def run_blast():
-    """
-    Run NCBI BLAST with the given query and subject files.
-
-    Keyword arguments:
-        query_file (str): Path to the query file.
-        subject_file (str): Path to the subject file.
-        e_cutoff (float): E-value cutoff for BLAST results. Default is 1E-40.
-        identity_perc_cutoff (float): Identity percentage cutoff for BLAST results. Default is 90.
-        max_hsps (int): Maximum number of HSPs (High-scoring Segment Pairs) to report. Default is 1.
-    """
-
-    query_file = "/data/Test/my_query.fasta"
-    subject_file = "/data/Test/my_subject.fasta"
-
-    ncbi_blast_bio(
-        query_file=query_file,
-        subject_file=subject_file,
-        e_cutoff=1e-40,
-        identity_perc_cutoff=90,
-        max_hsps=1,
-    )
