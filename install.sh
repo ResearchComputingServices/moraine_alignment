@@ -48,6 +48,8 @@ echo "conda environment activated"
 
 echo "Installing required packages"
 conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
 
 conda install -y pip parsnp
 
