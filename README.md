@@ -8,7 +8,7 @@ This toolsuite requires both Parsnp and Blast to be installed in this machine. I
 # Install
 You can install the required software with the following command:
 ```bash
-sudo ./install.sh
+./install.sh
 ```
 
 # Run the application
